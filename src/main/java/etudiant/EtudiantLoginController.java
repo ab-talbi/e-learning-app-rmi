@@ -89,7 +89,7 @@ public class EtudiantLoginController implements Initializable {
                 stage.close();
 
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("chat.fxml"));
-                Scene scene = new Scene(fxmlLoader.load(), 650, 520);
+                Scene scene = new Scene(fxmlLoader.load(), 733, 520);
                 Stage newStage = new Stage();
                 newStage.setTitle("Chat");
                 newStage.setScene(scene);

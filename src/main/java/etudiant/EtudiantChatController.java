@@ -3,15 +3,19 @@ package etudiant;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -40,6 +44,8 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
     public VBox vBoxMessages;
     @FXML
     private TextField messageInput;
+    @FXML
+    private Canvas canvas;
 
     public static String nom_utilisateur = "";
     public IServeur iServeur;
@@ -73,6 +79,52 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
             }
         });
 
+        /**
+         * Canvas initialisation (Tableau blanc)
+         */
+        final GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
+
+        double canvasWidth = graphicsContext.getCanvas().getWidth();
+        double canvasHeight = graphicsContext.getCanvas().getHeight();
+
+        graphicsContext.setFill(Color.LIGHTGRAY);
+        graphicsContext.setStroke(Color.BLACK);
+        graphicsContext.setLineWidth(5);
+        graphicsContext.fill();
+        graphicsContext.strokeRect(0, 0, canvasWidth, canvasHeight);
+        graphicsContext.setFill(Color.RED);
+        graphicsContext.setStroke(Color.BLUE);
+        graphicsContext.setLineWidth(1);
+
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED,
+                new EventHandler<MouseEvent>(){
+                    @Override
+                    public void handle(MouseEvent event) {
+                        graphicsContext.beginPath();
+                        graphicsContext.moveTo(event.getX(), event.getY());
+                        graphicsContext.stroke();
+                    }
+                });
+
+        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED,
+                new EventHandler<MouseEvent>(){
+                    @Override
+                    public void handle(MouseEvent event) {
+                        graphicsContext.lineTo(event.getX(), event.getY());
+                        graphicsContext.stroke();
+                    }
+                });
+
+        canvas.addEventHandler(MouseEvent.MOUSE_RELEASED,
+                new EventHandler<MouseEvent>(){
+                    @Override
+                    public void handle(MouseEvent event) {
+                    }
+                });
+
+        /**
+         * Fin d'initialisation de Canvas
+         */
     }
 
     public void deconnecterButtonOnAction() throws IOException {
