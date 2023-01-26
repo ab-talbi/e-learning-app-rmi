@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="520.0" prefWidth="676.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="etudiant.EtudiantChatController">
+   <children>
+      <AnchorPane layoutY="35.0" prefHeight="485.0" prefWidth="137.0" style="-fx-background-color: #087EB2;">
+         <children>
+            <Button fx:id="getUsersButton" layoutX="8.0" layoutY="9.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="122.0" style="-fx-background-color: #560037;" text="Utilisateurs Connectés" textFill="WHITE">
+               <font>
+                  <Font size="9.0" />
+               </font></Button>
+            <ListView fx:id="listeAfficheUtilisateurs" accessibleRole="LIST_ITEM" layoutX="8.0" layoutY="52.0" prefHeight="377.0" prefWidth="122.0" style="-fx-background-color: #087EB2; -fx-fixed-cell-size: 45; -fx-padding: 5;" />
+            <Button fx:id="deconnecterButton" layoutX="8.0" layoutY="445.0" mnemonicParsing="false" onAction="#deconnecterButtonOnAction" prefHeight="30.0" prefWidth="122.0" style="-fx-background-color: #CA0000;" text="Deconnecter" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="12.0" />
+               </font>
+            </Button>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="discussionPane" layoutX="137.0" layoutY="35.0" prefHeight="485.0" prefWidth="324.0" style="-fx-background-color: #E3E3E3;">
+         <children>
+            <TextField fx:id="messageInput" layoutX="5.0" layoutY="437.0" prefHeight="31.0" prefWidth="228.0" style="-fx-background-color: #ffffff;">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </TextField>
+            <Button fx:id="sendMessageButton" layoutX="239.0" layoutY="438.0" mnemonicParsing="false" onAction="#sendMessageButtonOnAction" prefHeight="30.0" prefWidth="81.0" style="-fx-background-color: #030023;" text="Envoyer" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="13.0" />
+               </font>
+            </Button>
+            <ScrollPane fx:id="messageTextArea" layoutX="4.0" prefHeight="419.0" prefWidth="317.0">
+               <content>
+                  <VBox fx:id="vBoxMessages" prefHeight="416.0" prefWidth="305.0" />
+               </content>
+            </ScrollPane>
+         </children>
+      </AnchorPane>
+      <AnchorPane prefHeight="35.0" prefWidth="676.0" style="-fx-background-color: #030023;">
+         <children>
+            <Label fx:id="discussionLabel" alignment="CENTER" layoutX="240.0" layoutY="1.0" prefHeight="31.0" prefWidth="382.0" text="Votre Espace" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="21.0" />
+               </font>
+            </Label>
+            <Label fx:id="welcomeLabel" alignment="CENTER" layoutX="13.0" layoutY="4.0" text="Hi Username" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="21.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="whiteBoardAnchorPane" layoutX="462.0" layoutY="37.0" prefHeight="477.0" prefWidth="210.0" />
+   </children>
+</AnchorPane>
