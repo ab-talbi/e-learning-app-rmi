@@ -1,5 +1,7 @@
 package serveur;
 
+import javafx.scene.canvas.GraphicsContext;
+
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -12,4 +14,5 @@ public interface IServeur extends Remote {
     public void enregistrerUtilisateurDansLaSessionEtEnvoiLaListe(String nom_utilisateur) throws RemoteException, MalformedURLException, NotBoundException;
     public void decconnecterUtilisateur(String nom_utilisateur) throws RemoteException;
     public void envoiMessage(String nom_utilisateur, String message) throws RemoteException;
+    public void envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(String nom_utilisateur, double x, double y) throws RemoteException;
 }
