@@ -3,6 +3,7 @@ package etudiant;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -46,9 +47,12 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
     private TextField messageInput;
     @FXML
     private Canvas canvas;
+    @FXML HBox buttonBox;
 
     public static String nom_utilisateur = "";
     public IServeur iServeur;
+    public GraphicsContext graphicsContext;
+
     public EtudiantChatController() throws RemoteException {
         super();
     }
@@ -79,22 +83,100 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
             }
         });
 
-        /**
-         * Canvas initialisation (Tableau blanc)
-         */
-        final GraphicsContext graphicsContext = canvas.getGraphicsContext2D();
+        initialisationTableauBlanc();
+    }
 
+    /**
+     * initialiser l'espace du tableau blanc avec Canvas pour le dessin
+     */
+    public void initialisationTableauBlanc(){
+
+        graphicsContext = canvas.getGraphicsContext2D();
         double canvasWidth = graphicsContext.getCanvas().getWidth();
         double canvasHeight = graphicsContext.getCanvas().getHeight();
 
-        graphicsContext.setFill(Color.LIGHTGRAY);
-        graphicsContext.setStroke(Color.BLACK);
-        graphicsContext.setLineWidth(5);
+        //Par défaut
         graphicsContext.fill();
         graphicsContext.strokeRect(0, 0, canvasWidth, canvasHeight);
         graphicsContext.setFill(Color.RED);
-        graphicsContext.setStroke(Color.BLUE);
+        graphicsContext.setStroke(Color.BLACK);
         graphicsContext.setLineWidth(1);
+
+        final Button resetButton = new Button("Supprimer Tous");
+        resetButton.setOnAction(actionEvent -> {
+            graphicsContext.clearRect(1, 1, graphicsContext.getCanvas().getWidth() - 2,
+                    graphicsContext.getCanvas().getHeight() - 2);
+        });
+        resetButton.setTranslateX(10);
+
+        // Set up the pen color chooser
+        ChoiceBox<String> colorChooser = new ChoiceBox<>(
+                FXCollections.observableArrayList("Black", "Blue", "Red", "Green", "Brown", "Orange"));
+        // Select the first option by default
+        colorChooser.getSelectionModel().selectFirst();
+
+        colorChooser.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (ov, old, newval) -> {
+            Number idx = (Number) newval;
+            Color newColor;
+            switch (idx.intValue()) {
+                case 0:
+                    newColor = Color.BLACK;
+                    break;
+                case 1:
+                    newColor = Color.BLUE;
+                    break;
+                case 2:
+                    newColor = Color.RED;
+                    break;
+                case 3:
+                    newColor = Color.GREEN;
+                    break;
+                case 4:
+                    newColor = Color.BROWN;
+                    break;
+                case 5:
+                    newColor = Color.ORANGE;
+                    break;
+                default:
+                    newColor = Color.BLACK;
+                    break;
+            }
+            graphicsContext.setStroke(newColor);
+
+        });
+        colorChooser.setTranslateX(5);
+
+        ChoiceBox<String> sizeChooser = new ChoiceBox<>(FXCollections.observableArrayList("1", "2", "3", "4", "5"));
+        // Select the first option by default
+        sizeChooser.getSelectionModel().selectFirst();
+
+        sizeChooser.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (ov, old, newval) -> {
+            Number idx = (Number) newval;
+
+            switch (idx.intValue()) {
+                case 0:
+                    graphicsContext.setLineWidth(1);
+                    break;
+                case 1:
+                    graphicsContext.setLineWidth(2);
+                    break;
+                case 2:
+                    graphicsContext.setLineWidth(3);
+                    break;
+                case 3:
+                    graphicsContext.setLineWidth(4);
+                    break;
+                case 4:
+                    graphicsContext.setLineWidth(5);
+                    break;
+                default:
+                    graphicsContext.setLineWidth(1);
+                    break;
+            }
+        });
+        sizeChooser.setTranslateX(5);
+
+        buttonBox.getChildren().addAll(colorChooser, sizeChooser, resetButton);
 
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED,
                 new EventHandler<MouseEvent>(){
@@ -112,6 +194,17 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
                     public void handle(MouseEvent event) {
                         graphicsContext.lineTo(event.getX(), event.getY());
                         graphicsContext.stroke();
+
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    iServeur.envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(nom_utilisateur,event.getX(),event.getY());
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
                     }
                 });
 
@@ -121,10 +214,6 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
                     public void handle(MouseEvent event) {
                     }
                 });
-
-        /**
-         * Fin d'initialisation de Canvas
-         */
     }
 
     public void deconnecterButtonOnAction() throws IOException {
@@ -207,6 +296,18 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
             @Override
             public void run() {
                 vBoxMessages.getChildren().add(hbox);
+            }
+        });
+    }
+
+    @Override
+    public void recevoirPartieAjouteeSurLeTableauBlanc(double x, double y) throws RemoteException {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("j'ai recu la position : ("+x+","+y+")");
+                graphicsContext.lineTo(x, y);
+                graphicsContext.stroke();
             }
         });
     }

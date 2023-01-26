@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -62,6 +63,7 @@
       <AnchorPane fx:id="whiteBoardAnchorPane" layoutX="458.0" layoutY="35.0" prefHeight="485.0" prefWidth="274.0" style="-fx-background-color: #E3E3E3;">
          <children>
             <Canvas fx:id="canvas" height="266.0" layoutX="4.0" layoutY="5.0" width="266.0" />
+            <HBox fx:id="buttonBox" layoutX="9.0" layoutY="280.0" prefHeight="46.0" prefWidth="260.0" />
          </children></AnchorPane>
    </children>
 </AnchorPane>

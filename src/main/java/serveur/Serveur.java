@@ -1,6 +1,7 @@
 package serveur;
 
 import etudiant.IEtudiant;
+import javafx.scene.canvas.GraphicsContext;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
@@ -165,6 +166,15 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
         for(int i = 0 ; i < session.size() ; i++){
             if(!session.get(i).nom_utilisateur.equals(nom_utilisateur)){
                 session.get(i).iEtudiant.recevoirUnMessageDuServeur(nom_utilisateur,message);
+            }
+        }
+    }
+
+    @Override
+    public void envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(String nom_utilisateur, double x, double y) throws RemoteException {
+        for(int i = 0 ; i < session.size() ; i++){
+            if(!session.get(i).nom_utilisateur.equals(nom_utilisateur)){
+                session.get(i).iEtudiant.recevoirPartieAjouteeSurLeTableauBlanc(x,y);
             }
         }
     }
