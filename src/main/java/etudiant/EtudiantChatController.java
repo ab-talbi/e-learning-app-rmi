@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,15 +18,21 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import serveur.IServeur;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.rmi.Naming;
@@ -44,18 +51,25 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
     @FXML
     public VBox vBoxMessages;
     @FXML
+    private VBox vBoxFichiers;
+    @FXML
     private TextField messageInput;
     @FXML
     private Canvas canvas;
     @FXML
     private HBox buttonBox;
 
+
     public static String nom_utilisateur = "";
+    public static String role = "Etudiant";
+
     public IServeur iServeur;
 
     public GraphicsContext graphicsContext;
     Color couleurLocaleGraphique = Color.BLACK;
     double largeurDuLigneGraphique = 1;
+
+    FileChooser fileChooser = new FileChooser();
 
     public EtudiantChatController() throws RemoteException {
         super();
@@ -285,7 +299,7 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
             TextFlow textFlow = new TextFlow(text);
             textFlow.setStyle("-fx-color:rgb(239,242,255);"+" -fx-background-color:rgb(15,125,242);"+" -fx-background-radius: 7px 2px 2px 7px");
             textFlow.setPadding(new Insets(5,10,5,10));
-            textFlow.setMaxWidth(200);
+            textFlow.setMaxWidth(150);
 
             hbox.getChildren().add(textFlow);
             vBoxMessages.getChildren().add(hbox);
@@ -343,7 +357,7 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
         TextFlow textFlow = new TextFlow(textNomUtilisateur,textMessage);
         textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
         textFlow.setPadding(new Insets(5,10,5,10));
-        textFlow.setMaxWidth(200);
+        textFlow.setMaxWidth(150);
 
         hbox.getChildren().add(textFlow);
 
@@ -419,6 +433,123 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
             public void run() {
                 graphicsContext.clearRect(1, 1, graphicsContext.getCanvas().getWidth() - 2,
                         graphicsContext.getCanvas().getHeight() - 2);
+            }
+        });
+    }
+
+    /**
+     * Lorsque on click sur le button choisir un fichier, on selectionne le fichier qu'on veut envoyer
+     * et utiliser iServeur.envoiFichierATousLesUtilisateurs pour envoyer le nom de fichier avec le tableau des entiers pour le transfere au fichier
+     */
+    public void choisirUnFichierButtonOnAction(){
+        Stage stage = new Stage();
+        File selectedFile = fileChooser.showOpenDialog(stage);
+        if (selectedFile != null) {
+            try {
+                ArrayList<Integer> inc;
+                try (FileInputStream in = new FileInputStream(selectedFile)) {
+                    inc = new ArrayList<>();
+                    int c=0;
+                    while((c=in.read()) != -1) {
+                        inc.add(c);
+                    }
+                }
+
+                iServeur.envoiFichierATousLesUtilisateurs(nom_utilisateur,role,inc, selectedFile.getName());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Recevoir le fichier et afficher son nom qui est clickable pour l'enregistrer ou l'afficher
+     * @param inc
+     * @param nom_fichier
+     * @throws RemoteException
+     */
+    @Override
+    public void recevoirFichierDuServeur(String nom_utilisateur,String role, ArrayList<Integer> inc, String nom_fichier) throws RemoteException {
+        HBox hbox = new HBox();
+        hbox.setAlignment(Pos.CENTER_LEFT);
+        hbox.setPadding(new Insets(5,5,5,5));
+
+        Text textFichier = new Text(nom_fichier);
+
+        textFichier.setFill(Color.web("002B5B"));
+
+        TextFlow textFlow = new TextFlow(textFichier);
+        textFlow.setPadding(new Insets(1,1,5,1));
+        textFlow.setMaxWidth(279);
+
+        hbox.getChildren().add(textFlow);
+
+        final ContextMenu contextMenu = new ContextMenu();
+        MenuItem telecharger = new MenuItem("Télecharger");
+        MenuItem voir = new MenuItem("Voir");
+        contextMenu.getItems().addAll(telecharger, voir);
+        telecharger.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                FileOutputStream fileOutputStream;
+                String repertoireChoisi = "";
+
+                //Pour distinguer entre les systemes d'exploitation dans le chemin
+                String separator;
+                if(System.getProperty("os.name").startsWith("Linux") || System.getProperty("os.name").startsWith("MacOS")){
+                    separator = "/";
+                }
+                else{
+                    separator = "\\";
+                }
+
+                try{
+                    //ici pout choisir le repertoire de destination
+                    DirectoryChooser directoryChooser = new DirectoryChooser();
+                    Stage stage = new Stage();
+                    File selectedFile = directoryChooser.showDialog(stage);
+                    if (selectedFile != null) {
+                        repertoireChoisi = selectedFile.getAbsolutePath();
+                    }else{
+                        repertoireChoisi = System.getProperty("user.home");
+                    }
+
+                    fileOutputStream = new FileOutputStream( repertoireChoisi + separator + nom_fichier);
+                    String[] extension = nom_fichier.split("\\.");
+                    for (int i = 0; i<inc.size(); i++) {
+                        int c = inc.get(i);
+                        if(extension[extension.length - 1].equals("txt")||
+                                extension[extension.length - 1].equals("java")||
+                                extension[extension.length - 1].equals("php")||
+                                extension[extension.length - 1].equals("c")||
+                                extension[extension.length - 1].equals("cpp")||
+                                extension[extension.length - 1].equals("xml")
+                        ) {
+                            fileOutputStream.write((char)c);
+                        }
+                        else{
+                            fileOutputStream.write((byte)c);
+                        }
+                    }
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
+                }catch (Exception e){}
+            }
+        });
+
+        hbox.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.isSecondaryButtonDown()) {
+                    contextMenu.show(hbox, event.getScreenX(), event.getScreenY());
+                }
+            }
+        });
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                vBoxFichiers.getChildren().add(hbox);
             }
         });
     }
