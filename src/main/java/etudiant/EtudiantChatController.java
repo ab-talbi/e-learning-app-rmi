@@ -47,11 +47,15 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
     private TextField messageInput;
     @FXML
     private Canvas canvas;
-    @FXML HBox buttonBox;
+    @FXML
+    private HBox buttonBox;
 
     public static String nom_utilisateur = "";
     public IServeur iServeur;
+
     public GraphicsContext graphicsContext;
+    Color couleurLocaleGraphique = Color.BLACK;
+    double largeurDuLigneGraphique = 1;
 
     public EtudiantChatController() throws RemoteException {
         super();
@@ -99,55 +103,57 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
         graphicsContext.fill();
         graphicsContext.strokeRect(0, 0, canvasWidth, canvasHeight);
         graphicsContext.setFill(Color.RED);
-        graphicsContext.setStroke(Color.BLACK);
-        graphicsContext.setLineWidth(1);
+        graphicsContext.setStroke(couleurLocaleGraphique);
+        graphicsContext.setLineWidth(largeurDuLigneGraphique);
 
         final Button resetButton = new Button("Supprimer Tous");
         resetButton.setOnAction(actionEvent -> {
             graphicsContext.clearRect(1, 1, graphicsContext.getCanvas().getWidth() - 2,
                     graphicsContext.getCanvas().getHeight() - 2);
+
+            try {
+                iServeur.supprimerTousLesDessinsDuTableauBlanc(nom_utilisateur);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         });
         resetButton.setTranslateX(10);
 
-        // Set up the pen color chooser
         ChoiceBox<String> colorChooser = new ChoiceBox<>(
-                FXCollections.observableArrayList("Black", "Blue", "Red", "Green", "Brown", "Orange"));
-        // Select the first option by default
+                FXCollections.observableArrayList("Noir", "Bleu", "Rouge", "Vert", "Marron", "Orange"));
         colorChooser.getSelectionModel().selectFirst();
 
         colorChooser.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (ov, old, newval) -> {
             Number idx = (Number) newval;
-            Color newColor;
             switch (idx.intValue()) {
                 case 0:
-                    newColor = Color.BLACK;
+                    couleurLocaleGraphique = Color.BLACK;
                     break;
                 case 1:
-                    newColor = Color.BLUE;
+                    couleurLocaleGraphique = Color.BLUE;
                     break;
                 case 2:
-                    newColor = Color.RED;
+                    couleurLocaleGraphique = Color.RED;
                     break;
                 case 3:
-                    newColor = Color.GREEN;
+                    couleurLocaleGraphique = Color.GREEN;
                     break;
                 case 4:
-                    newColor = Color.BROWN;
+                    couleurLocaleGraphique = Color.BROWN;
                     break;
                 case 5:
-                    newColor = Color.ORANGE;
+                    couleurLocaleGraphique = Color.ORANGE;
                     break;
                 default:
-                    newColor = Color.BLACK;
+                    couleurLocaleGraphique = Color.BLACK;
                     break;
             }
-            graphicsContext.setStroke(newColor);
-
+            graphicsContext.setStroke(couleurLocaleGraphique);
         });
         colorChooser.setTranslateX(5);
 
         ChoiceBox<String> sizeChooser = new ChoiceBox<>(FXCollections.observableArrayList("1", "2", "3", "4", "5"));
-        // Select the first option by default
+
         sizeChooser.getSelectionModel().selectFirst();
 
         sizeChooser.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (ov, old, newval) -> {
@@ -173,6 +179,7 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
                     graphicsContext.setLineWidth(1);
                     break;
             }
+            largeurDuLigneGraphique = graphicsContext.getLineWidth();
         });
         sizeChooser.setTranslateX(5);
 
@@ -182,9 +189,30 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
                 new EventHandler<MouseEvent>(){
                     @Override
                     public void handle(MouseEvent event) {
+                        graphicsContext.setStroke(couleurLocaleGraphique);
+                        graphicsContext.setLineWidth(largeurDuLigneGraphique);
+
                         graphicsContext.beginPath();
                         graphicsContext.moveTo(event.getX(), event.getY());
                         graphicsContext.stroke();
+
+                        /**
+                         * Ici j'envoi la premiere position pour eviter un bug
+                         * le bug etait qaund j'envoi la position, la derniere est liéé avec lanciennes
+                         * danc un ligne que je veux pas est dissiné par défaut
+                         * c'est pourquoi il me faut a chaque qulique à indiquer au autres utilisateur
+                         * que voilà la premiere position
+                         */
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    iServeur.envoiLaPremierePositionDuPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(nom_utilisateur,event.getX(),event.getY(),graphicsContext.getLineWidth(), String.valueOf(couleurLocaleGraphique));
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
                     }
                 });
 
@@ -192,14 +220,19 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
                 new EventHandler<MouseEvent>(){
                     @Override
                     public void handle(MouseEvent event) {
+                        graphicsContext.setStroke(couleurLocaleGraphique);
+                        graphicsContext.setLineWidth(largeurDuLigneGraphique);
+
                         graphicsContext.lineTo(event.getX(), event.getY());
                         graphicsContext.stroke();
-
+                        /**
+                         * Ici j'envoi les positions de dessin au autres utilisateurs avec le couleur et la largeur de ligne
+                         */
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    iServeur.envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(nom_utilisateur,event.getX(),event.getY());
+                                    iServeur.envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(nom_utilisateur,event.getX(),event.getY(),graphicsContext.getLineWidth(), String.valueOf(couleurLocaleGraphique));
                                 } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
@@ -216,12 +249,18 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
                 });
     }
 
+    /**
+     * Pour la déconnection
+     * elle appelle la méthode decconnecterUtilisateur(nom_utilisateur) du serveur,
+     * pour retirer cet utilisateur de la session
+     * @throws IOException
+     */
     public void deconnecterButtonOnAction() throws IOException {
-        iServeur.decconnecterUtilisateur(nom_utilisateur);
+        iServeur.deconnecterUtilisateur(nom_utilisateur);
 
         Stage stage = (Stage) deconnecterButton.getScene().getWindow();
         stage.close();
-
+        //Retour au login
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 560, 350);
         Stage newStage = new Stage();
@@ -230,6 +269,10 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
         newStage.show();
     }
 
+    /**
+     * Pour envoyer un message au autre(s) utilisateur(s)
+     * @throws RemoteException
+     */
     public void sendMessageButtonOnAction() throws RemoteException {
         if(messageInput.getText().isBlank() == false){
             HBox hbox = new HBox();
@@ -246,13 +289,19 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
             hbox.getChildren().add(textFlow);
             vBoxMessages.getChildren().add(hbox);
-
+            //Envoi Message à tous
             iServeur.envoiMessage(nom_utilisateur,messageInput.getText());
 
             messageInput.clear();
         }
     }
 
+    /**
+     * Pour modifier la liste des utilisateurs connectés
+     * qui a eté envoyé par le serveur aprés qu'un utilisateur à fait login
+     * @param listeUtilisateurs
+     * @throws RemoteException
+     */
     @Override
     public void modifierLaListeDesUtilisateursDuServeur(ArrayList<String> listeUtilisateurs) throws RemoteException {
         if(listeUtilisateurs != null){
@@ -274,6 +323,12 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
         }
     }
 
+    /**
+     * Pour afficher un message des autres utilisateurs
+     * @param nom_utilisateur
+     * @param message
+     * @throws RemoteException
+     */
     @Override
     public void recevoirUnMessageDuServeur(String nom_utilisateur, String message) throws RemoteException {
         HBox hbox = new HBox();
@@ -300,14 +355,70 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
         });
     }
 
+    /**
+     * Pour recevoir la premiere position (x,y) du curseur d'un utilisateur qui est entreint de dessiner
+     * @param position_x
+     * @param position_y
+     * @param largeurDuLigne
+     * @param couleur
+     * @throws RemoteException
+     */
     @Override
-    public void recevoirPartieAjouteeSurLeTableauBlanc(double x, double y) throws RemoteException {
+    public void recevoirLaPremierePositionDuPartieAjouteeSurLeTableauBlanc(double position_x, double position_y, double largeurDuLigne, String couleur) throws RemoteException {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                System.out.println("j'ai recu la position : ("+x+","+y+")");
-                graphicsContext.lineTo(x, y);
+                Color couleurConvirti = Color.valueOf(couleur);
+
+                graphicsContext.setLineWidth(largeurDuLigne);
+                graphicsContext.setStroke(couleurConvirti);
+
+                System.out.println("j'ai recu la 1ere position : ("+position_x+","+position_y+")");
+
+                graphicsContext.beginPath();
+                graphicsContext.moveTo(position_x,position_y);
                 graphicsContext.stroke();
+            }
+        });
+    }
+
+    /**
+     * Pour recevoir les positions (x,y) du curseur d'un utilisateur qui est entreint de dessiner ansi que la largeur de ligne et son couleur
+     * @param position_x
+     * @param position_y
+     * @param largeurDuLigne
+     * @param couleur
+     * @throws RemoteException
+     */
+    @Override
+    public void recevoirPartieAjouteeSurLeTableauBlanc(double position_x, double position_y, double largeurDuLigne, String couleur) throws RemoteException {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Color couleurConvirti = Color.valueOf(couleur);
+
+                graphicsContext.setLineWidth(largeurDuLigne);
+                graphicsContext.setStroke(couleurConvirti);
+
+                System.out.println("j'ai recu la position : ("+position_x+","+position_y+")");
+
+                graphicsContext.lineTo(position_x, position_y);
+                graphicsContext.stroke();
+            }
+        });
+    }
+
+    /**
+     * Cette méthode est là pour vider le tableau blanc pour tous le monde
+     * @throws RemoteException
+     */
+    @Override
+    public void supprimerTousLesDessinsDuTableauBlancEnvoyerParServeur() throws RemoteException {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                graphicsContext.clearRect(1, 1, graphicsContext.getCanvas().getWidth() - 2,
+                        graphicsContext.getCanvas().getHeight() - 2);
             }
         });
     }

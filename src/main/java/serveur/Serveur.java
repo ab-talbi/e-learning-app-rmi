@@ -2,7 +2,10 @@ package serveur;
 
 import etudiant.IEtudiant;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -134,7 +137,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
      * @throws RemoteException
      */
     @Override
-    public void decconnecterUtilisateur(String nom_utilisateur) throws RemoteException {
+    public void deconnecterUtilisateur(String nom_utilisateur) throws RemoteException {
         for (int i = 0 ; i<session.size();i++){
             if(session.get(i).nom_utilisateur.equals(nom_utilisateur)){
                 session.remove(i);
@@ -170,11 +173,53 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
         }
     }
 
+    /**
+     * C'est pour informer les autres utilisateurs de la position du premiere mouvement du curseur
+     * Les autres utilisateurs recoit la positions et initialiser le couleur et largeure de la ligne
+     * @param nom_utilisateur
+     * @param position_x
+     * @param position_y
+     * @param largeurDuLigne
+     * @param couleur
+     * @throws RemoteException
+     */
     @Override
-    public void envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(String nom_utilisateur, double x, double y) throws RemoteException {
+    public void envoiLaPremierePositionDuPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(String nom_utilisateur, double position_x, double position_y, double largeurDuLigne, String couleur) throws RemoteException {
         for(int i = 0 ; i < session.size() ; i++){
             if(!session.get(i).nom_utilisateur.equals(nom_utilisateur)){
-                session.get(i).iEtudiant.recevoirPartieAjouteeSurLeTableauBlanc(x,y);
+                session.get(i).iEtudiant.recevoirLaPremierePositionDuPartieAjouteeSurLeTableauBlanc(position_x,position_y,largeurDuLigne,couleur);
+            }
+        }
+    }
+
+    /**
+     * Envoi de la position du curseur au autres utilisateur avec le couleur et la largeur de ligne
+     * @param nom_utilisateur
+     * @param position_x
+     * @param position_y
+     * @param largeurDuLigne
+     * @param couleur
+     * @throws RemoteException
+     */
+    @Override
+    public void envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(String nom_utilisateur, double position_x, double position_y, double largeurDuLigne, String couleur) throws RemoteException {
+        for(int i = 0 ; i < session.size() ; i++){
+            if(!session.get(i).nom_utilisateur.equals(nom_utilisateur)){
+                session.get(i).iEtudiant.recevoirPartieAjouteeSurLeTableauBlanc(position_x,position_y,largeurDuLigne,couleur);
+            }
+        }
+    }
+
+    /**
+     * Pour forcer la suppression du tableau blanc pour les autres utilisateurs
+     * @param nom_utilisateur
+     * @throws RemoteException
+     */
+    @Override
+    public void supprimerTousLesDessinsDuTableauBlanc(String nom_utilisateur) throws RemoteException {
+        for(int i = 0 ; i < session.size() ; i++){
+            if(!session.get(i).nom_utilisateur.equals(nom_utilisateur)){
+                session.get(i).iEtudiant.supprimerTousLesDessinsDuTableauBlancEnvoyerParServeur();
             }
         }
     }

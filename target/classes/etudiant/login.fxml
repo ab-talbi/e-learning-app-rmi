@@ -70,11 +70,6 @@
                   <Font name="Arial Black" size="11.0" />
                </font>
             </Label>
-            <Button fx:id="versRegisterButton" layoutX="6.0" layoutY="310.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="273.0" style="-fx-background-color: #E0E7EC;" text="Creer un Compte si vous n'avez pas un" textFill="#4238b0">
-               <font>
-                  <Font name="Arial" size="11.0" />
-               </font>
-            </Button>
             <AnchorPane layoutX="-159.0" prefHeight="37.0" prefWidth="560.0" style="-fx-background-color: #001234;">
                <children>
                   <Label layoutX="140.0" prefHeight="37.0" prefWidth="291.0" text="Se connecter à votre compte" textFill="WHITE">
