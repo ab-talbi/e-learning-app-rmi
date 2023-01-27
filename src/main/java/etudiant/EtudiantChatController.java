@@ -469,16 +469,32 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
      * @throws RemoteException
      */
     @Override
-    public void recevoirFichierDuServeur(String nom_utilisateur,String role, ArrayList<Integer> inc, String nom_fichier) throws RemoteException {
+    public void recevoirFichierDuServeur(String nom_utilisateur_source,String role_utilisateur_source, ArrayList<Integer> inc, String nom_fichier) throws RemoteException {
+        String nom_a_afficher = "";
+        String couleur_nom;
+
+        if(nom_utilisateur_source.equals(nom_utilisateur)){
+            nom_a_afficher = "Moi";
+            couleur_nom = "51005B";
+        }else if(role_utilisateur_source.equals("Professeur")){
+            nom_a_afficher = "Professeur";
+            couleur_nom = "5B0000";
+        }else{
+            nom_a_afficher = nom_utilisateur_source;
+            couleur_nom = "015B00";
+        }
+
         HBox hbox = new HBox();
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.setPadding(new Insets(5,5,5,5));
 
-        Text textFichier = new Text(nom_fichier);
+        Text textNomAAfficher = new Text(nom_a_afficher + "\n");
+        textNomAAfficher.setFill(Color.web(couleur_nom));
 
+        Text textFichier = new Text(nom_fichier);
         textFichier.setFill(Color.web("002B5B"));
 
-        TextFlow textFlow = new TextFlow(textFichier);
+        TextFlow textFlow = new TextFlow(textNomAAfficher,textFichier);
         textFlow.setPadding(new Insets(1,1,5,1));
         textFlow.setMaxWidth(279);
 
@@ -486,8 +502,7 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
         final ContextMenu contextMenu = new ContextMenu();
         MenuItem telecharger = new MenuItem("Télecharger");
-        MenuItem voir = new MenuItem("Voir");
-        contextMenu.getItems().addAll(telecharger, voir);
+        contextMenu.getItems().addAll(telecharger);
         telecharger.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
