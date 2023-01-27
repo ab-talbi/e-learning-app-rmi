@@ -63,6 +63,7 @@ public class EtudiantLoginController implements Initializable {
         Stage stage = (Stage) annulerButton.getScene().getWindow();
         stage.close();
         Platform.exit();
+        System.exit(0);
     }
 
     public void loginButtonOnAction() throws IOException, NotBoundException, SQLException {
