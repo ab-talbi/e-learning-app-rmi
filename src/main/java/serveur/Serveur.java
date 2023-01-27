@@ -224,4 +224,11 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
         }
     }
 
+    @Override
+    public void envoiFichierATousLesUtilisateurs(String nom_utilisateur_source,String role_utilisateur_source,ArrayList<Integer> inc, String nom_fichier) throws RemoteException {
+        for(int i = 0 ; i < session.size() ; i++){
+            session.get(i).iEtudiant.recevoirFichierDuServeur(nom_utilisateur_source,role_utilisateur_source,inc,nom_fichier);
+        }
+    }
+
 }

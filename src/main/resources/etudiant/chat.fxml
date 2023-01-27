@@ -13,13 +13,13 @@
 
 <AnchorPane prefHeight="520.0" prefWidth="733.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="etudiant.EtudiantChatController">
    <children>
-      <AnchorPane layoutY="35.0" prefHeight="485.0" prefWidth="137.0" style="-fx-background-color: #087EB2;">
+      <AnchorPane layoutY="35.0" prefHeight="485.0" prefWidth="137.0" style="-fx-background-color: #002B5B;">
          <children>
-            <Button fx:id="getUsersButton" layoutX="8.0" layoutY="9.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="122.0" style="-fx-background-color: #560037;" text="Utilisateurs Connectés" textFill="WHITE">
+            <Button fx:id="getUsersButton" layoutX="8.0" layoutY="9.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="122.0" style="-fx-background-color: #FFFFFF;" text="Utilisateurs Connectés" textFill="#040043">
                <font>
-                  <Font size="9.0" />
+                  <Font size="11.0" />
                </font></Button>
-            <ListView fx:id="listeAfficheUtilisateurs" accessibleRole="LIST_ITEM" layoutX="8.0" layoutY="52.0" prefHeight="377.0" prefWidth="122.0" style="-fx-background-color: #087EB2; -fx-fixed-cell-size: 45; -fx-padding: 5;" />
+            <ListView fx:id="listeAfficheUtilisateurs" accessibleRole="LIST_ITEM" layoutX="8.0" layoutY="52.0" prefHeight="377.0" prefWidth="122.0" style="-fx-background-color: #002B5B; -fx-fixed-cell-size: 45; -fx-padding: 5;" />
             <Button fx:id="deconnecterButton" layoutX="8.0" layoutY="445.0" mnemonicParsing="false" onAction="#deconnecterButtonOnAction" prefHeight="30.0" prefWidth="122.0" style="-fx-background-color: #CA0000;" text="Deconnecter" textFill="WHITE">
                <font>
                   <Font name="Arial Black" size="12.0" />
@@ -27,26 +27,26 @@
             </Button>
          </children>
       </AnchorPane>
-      <AnchorPane fx:id="discussionPane" layoutX="137.0" layoutY="35.0" prefHeight="485.0" prefWidth="324.0" style="-fx-background-color: #E3E3E3;">
+      <AnchorPane fx:id="discussionPane" layoutX="137.0" layoutY="35.0" prefHeight="485.0" prefWidth="290.0" style="-fx-background-color: #E3E3E3;">
          <children>
-            <TextField fx:id="messageInput" layoutX="5.0" layoutY="437.0" prefHeight="31.0" prefWidth="228.0" style="-fx-background-color: #ffffff;">
+            <TextField fx:id="messageInput" layoutX="5.0" layoutY="437.0" prefHeight="31.0" prefWidth="196.0" style="-fx-background-color: #ffffff;">
                <font>
                   <Font size="15.0" />
                </font>
             </TextField>
-            <Button fx:id="sendMessageButton" layoutX="239.0" layoutY="438.0" mnemonicParsing="false" onAction="#sendMessageButtonOnAction" prefHeight="30.0" prefWidth="81.0" style="-fx-background-color: #030023;" text="Envoyer" textFill="WHITE">
+            <Button fx:id="sendMessageButton" layoutX="205.0" layoutY="438.0" mnemonicParsing="false" onAction="#sendMessageButtonOnAction" prefHeight="30.0" prefWidth="81.0" style="-fx-background-color: #002B5B;" text="Envoyer" textFill="WHITE">
                <font>
                   <Font name="Arial Black" size="13.0" />
                </font>
             </Button>
-            <ScrollPane fx:id="messageTextArea" layoutX="4.0" layoutY="4.0" prefHeight="419.0" prefWidth="317.0">
+            <ScrollPane fx:id="messageTextArea" layoutX="4.0" layoutY="4.0" prefHeight="419.0" prefWidth="282.0">
                <content>
-                  <VBox fx:id="vBoxMessages" prefHeight="416.0" prefWidth="315.0" />
+                  <VBox fx:id="vBoxMessages" prefHeight="416.0" prefWidth="278.0" />
                </content>
             </ScrollPane>
          </children>
       </AnchorPane>
-      <AnchorPane prefHeight="35.0" prefWidth="733.0" style="-fx-background-color: #030023;">
+      <AnchorPane prefHeight="35.0" prefWidth="733.0" style="-fx-background-color: #002B5B;">
          <children>
             <Label fx:id="discussionLabel" alignment="CENTER" layoutX="240.0" layoutY="1.0" prefHeight="31.0" prefWidth="382.0" text="Votre Espace" textAlignment="CENTER" textFill="WHITE">
                <font>
@@ -60,10 +60,21 @@
             </Label>
          </children>
       </AnchorPane>
-      <AnchorPane fx:id="whiteBoardAnchorPane" layoutX="458.0" layoutY="35.0" prefHeight="485.0" prefWidth="274.0" style="-fx-background-color: #E3E3E3;">
+      <AnchorPane fx:id="whiteBoardAnchorPane" layoutX="427.0" layoutY="35.0" prefHeight="485.0" prefWidth="305.0" style="-fx-background-color: #E3E3E3;">
          <children>
-            <Canvas fx:id="canvas" height="266.0" layoutX="4.0" layoutY="5.0" width="266.0" />
-            <HBox fx:id="buttonBox" layoutX="9.0" layoutY="280.0" prefHeight="46.0" prefWidth="260.0" />
+            <Canvas fx:id="canvas" height="204.0" layoutX="4.0" layoutY="5.0" width="299.0" />
+            <HBox fx:id="buttonBox" layoutX="24.0" layoutY="212.0" prefHeight="35.0" prefWidth="260.0" />
+            <HBox fx:id="buttonBoxAdmin" layoutX="23.0" layoutY="251.0" prefHeight="35.0" prefWidth="260.0" />
+            <ScrollPane layoutX="10.0" layoutY="304.0" prefHeight="129.0" prefWidth="282.0">
+               <content>
+                  <VBox fx:id="vBoxFichiers" prefHeight="124.0" prefWidth="279.0" />
+               </content>
+            </ScrollPane>
+            <Button fx:id="choisirUnFichierButton" layoutX="70.0" layoutY="445.0" mnemonicParsing="false" onAction="#choisirUnFichierButtonOnAction" style="-fx-background-color: #002B5B;" text="Choisir un fichier à partager" textFill="WHITE">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Button>
          </children></AnchorPane>
    </children>
 </AnchorPane>
