@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Blend?>
+<?import javafx.scene.effect.PerspectiveTransform?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="loginPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="560.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="admin.AdminLoginController">
+   <left>
+      <AnchorPane prefHeight="350.0" prefWidth="159.0" style="-fx-background-color: #1C1921;" BorderPane.alignment="CENTER">
+         <children>
+            <ImageView fx:id="logoImageView" fitHeight="64.0" fitWidth="200.0" layoutX="27.0" layoutY="50.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../../../../IdeaProjects/Projet1UDPChat_TALBI_IRISI2/Images/logo.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="58.0" layoutY="311.0" text="TALBI Ayoub" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="11.0" />
+               </font>
+            </Label>
+            <Label layoutX="20.0" layoutY="282.0" text="Réalisé par :" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="11.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+   </left>
+   <center>
+      <AnchorPane prefHeight="380.0" prefWidth="411.0" style="-fx-background-color: #E0E7EC;" BorderPane.alignment="CENTER">
+         <children>
+            <Label layoutX="46.0" layoutY="73.0" text="Nom d'utilisateur" textFill="#f53400">
+               <font>
+                  <Font name="Arial Black" size="12.0" />
+               </font>
+            </Label>
+            <TextField fx:id="usernameInput" layoutX="45.0" layoutY="99.0" prefHeight="25.0" prefWidth="312.0" promptText="Saisir votre nom">
+               <font>
+                  <Font size="14.0" />
+               </font></TextField>
+            <Label layoutX="46.0" layoutY="147.0" text="Mot de Passe" textFill="#f53400">
+               <font>
+                  <Font name="Arial Black" size="12.0" />
+               </font>
+            </Label>
+            <PasswordField fx:id="passwordInput" layoutX="45.0" layoutY="172.0" prefHeight="25.0" prefWidth="311.0" promptText="Saisir le mot de passe">
+               <font>
+                  <Font size="14.0" />
+               </font></PasswordField>
+            <Button fx:id="loginButton" layoutX="150.0" layoutY="272.0" mnemonicParsing="false" onAction="#loginButtonOnAction" prefHeight="25.0" prefWidth="206.0" style="-fx-background-color: #F53400;" text="Se Connecter" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="12.0" />
+               </font>
+            </Button>
+            <Button fx:id="annulerButton" layoutX="47.0" layoutY="272.0" mnemonicParsing="false" onAction="#annulerButtonOnAction" prefHeight="25.0" prefWidth="90.0" style="-fx-background-color: #2B2B2C;" text="Annuler" textFill="WHITE">
+               <font>
+                  <Font name="Arial Black" size="12.0" />
+               </font>
+            </Button>
+            <Label fx:id="errorMessageLogin" layoutX="46.0" layoutY="227.0" prefHeight="16.0" prefWidth="310.0" textFill="#ff1515">
+               <font>
+                  <Font name="Arial Black" size="11.0" />
+               </font>
+            </Label>
+            <AnchorPane layoutX="-159.0" prefHeight="37.0" prefWidth="560.0" style="-fx-background-color: #1C1921;">
+               <children>
+                  <Label layoutX="219.0" prefHeight="37.0" prefWidth="291.0" text="Se connecter pour admin" textFill="WHITE">
+                     <font>
+                        <Font name="Arial Black" size="18.0" />
+                     </font>
+                     <effect>
+                        <Blend>
+                           <topInput>
+                              <PerspectiveTransform />
+                           </topInput>
+                        </Blend>
+                     </effect>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>

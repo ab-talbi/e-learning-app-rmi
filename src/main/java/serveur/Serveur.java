@@ -9,7 +9,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class Serveur extends UnicastRemoteObject implements IServeur {
+public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPourAdmin {
 
     private static ArrayList<Session> session = new ArrayList<Session>();
     private static boolean interdit_de_dessiner_dans_le_tableau_blanc = false;
@@ -129,12 +129,18 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
      * @throws RemoteException
      */
     @Override
-    public void deconnecterUtilisateur(String nom_utilisateur) throws RemoteException {
+    public void deconnecterUtilisateur(String nom_utilisateur, String role) throws RemoteException {
         //retirer l'utilisateur de la session
         for (int i = 0 ; i<session.size();i++){
             if(session.get(i).nom_utilisateur.equals(nom_utilisateur)){
                 session.remove(i);
                 break;
+            }
+        }
+        //Si le prof qui à déconnecte il faut que les etudiant ont le droit de dessiner
+        if(role.equals("Professeur")){
+            for(int i = 0 ; i < session.size() ; i++){
+                session.get(i).iEtudiant.reponseDuServeurPourAuthorisationDesEtudiantsADissinerDuServeur(false);
             }
         }
         //modifier la liste des utilisateurs
@@ -247,4 +253,30 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
         }
     }
 
+    /**
+     *IServeur methodes pour Admin
+     */
+
+    /**
+     * récuperer les etudiants de la base de donnees
+     * @return
+     * @throws RuntimeException
+     */
+    @Override
+    public ArrayList<String> afficherLaListeDesEtudiants() throws RuntimeException, SQLException {
+        ArrayList<String> laListeAEnvoyer = new ArrayList<>();
+
+        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+        String strSelect = "Select * from registration where role= ?";
+
+        PreparedStatement st = conn.prepareStatement(strSelect);
+        st.setString(1,"Etudiant");
+
+        ResultSet rs = st.executeQuery();
+        while (rs.next()) {
+            laListeAEnvoyer.add(rs.getString("username"));
+        }
+
+        return laListeAEnvoyer;
+    }
 }

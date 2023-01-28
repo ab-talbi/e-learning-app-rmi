@@ -8,4 +8,6 @@ module etudiant {
     opens utilisateur to javafx.fxml;
     exports serveur;
     opens serveur to java.rmi;
+    exports admin;
+    opens admin to javafx.fxml;
 }
