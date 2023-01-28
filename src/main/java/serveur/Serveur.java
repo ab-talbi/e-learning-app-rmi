@@ -129,12 +129,18 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
      * @throws RemoteException
      */
     @Override
-    public void deconnecterUtilisateur(String nom_utilisateur) throws RemoteException {
+    public void deconnecterUtilisateur(String nom_utilisateur, String role) throws RemoteException {
         //retirer l'utilisateur de la session
         for (int i = 0 ; i<session.size();i++){
             if(session.get(i).nom_utilisateur.equals(nom_utilisateur)){
                 session.remove(i);
                 break;
+            }
+        }
+        //Si le prof qui à déconnecte il faut que les etudiant ont le droit de dessiner
+        if(role.equals("Professeur")){
+            for(int i = 0 ; i < session.size() ; i++){
+                session.get(i).iEtudiant.reponseDuServeurPourAuthorisationDesEtudiantsADissinerDuServeur(false);
             }
         }
         //modifier la liste des utilisateurs

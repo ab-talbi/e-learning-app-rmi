@@ -308,7 +308,7 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
      * @throws IOException
      */
     public void deconnecterButtonOnAction() throws IOException {
-        iServeur.deconnecterUtilisateur(nom_utilisateur);
+        iServeur.deconnecterUtilisateur(nom_utilisateur,role);
 
         Stage stage = (Stage) deconnecterButton.getScene().getWindow();
         stage.close();
