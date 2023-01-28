@@ -9,7 +9,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class Serveur extends UnicastRemoteObject implements IServeur {
+public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPourAdmin {
 
     private static ArrayList<Session> session = new ArrayList<Session>();
     private static boolean interdit_de_dessiner_dans_le_tableau_blanc = false;
@@ -253,4 +253,30 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
         }
     }
 
+    /**
+     *IServeur methodes pour Admin
+     */
+
+    /**
+     * récuperer les etudiants de la base de donnees
+     * @return
+     * @throws RuntimeException
+     */
+    @Override
+    public ArrayList<String> afficherLaListeDesEtudiants() throws RuntimeException, SQLException {
+        ArrayList<String> laListeAEnvoyer = new ArrayList<>();
+
+        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+        String strSelect = "Select * from registration where role= ?";
+
+        PreparedStatement st = conn.prepareStatement(strSelect);
+        st.setString(1,"Etudiant");
+
+        ResultSet rs = st.executeQuery();
+        while (rs.next()) {
+            laListeAEnvoyer.add(rs.getString("username"));
+        }
+
+        return laListeAEnvoyer;
+    }
 }
