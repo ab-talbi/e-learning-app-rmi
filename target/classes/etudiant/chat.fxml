@@ -63,14 +63,13 @@
       <AnchorPane fx:id="whiteBoardAnchorPane" layoutX="427.0" layoutY="35.0" prefHeight="485.0" prefWidth="305.0" style="-fx-background-color: #E3E3E3;">
          <children>
             <Canvas fx:id="canvas" height="204.0" layoutX="4.0" layoutY="5.0" width="299.0" />
-            <HBox fx:id="buttonBox" layoutX="24.0" layoutY="212.0" prefHeight="35.0" prefWidth="260.0" />
-            <HBox fx:id="buttonBoxAdmin" layoutX="23.0" layoutY="251.0" prefHeight="35.0" prefWidth="260.0" />
-            <ScrollPane layoutX="10.0" layoutY="304.0" prefHeight="129.0" prefWidth="282.0">
+            <HBox fx:id="buttonBox" layoutX="8.0" layoutY="212.0" prefHeight="35.0" prefWidth="290.0" />
+            <ScrollPane layoutX="10.0" layoutY="257.0" prefHeight="168.0" prefWidth="282.0">
                <content>
-                  <VBox fx:id="vBoxFichiers" prefHeight="124.0" prefWidth="279.0" />
+                  <VBox fx:id="vBoxFichiers" prefHeight="166.0" prefWidth="279.0" />
                </content>
             </ScrollPane>
-            <Button fx:id="choisirUnFichierButton" layoutX="70.0" layoutY="445.0" mnemonicParsing="false" onAction="#choisirUnFichierButtonOnAction" style="-fx-background-color: #002B5B;" text="Choisir un fichier à partager" textFill="WHITE">
+            <Button fx:id="choisirUnFichierButton" layoutX="66.0" layoutY="442.0" mnemonicParsing="false" onAction="#choisirUnFichierButtonOnAction" style="-fx-background-color: #002B5B;" text="Choisir un fichier à partager" textFill="WHITE">
                <font>
                   <Font size="13.0" />
                </font>

@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import static etudiant.EtudiantChatController.nom_utilisateur;
+import static etudiant.EtudiantChatController.role;
 
 public class EtudiantLoginController implements Initializable {
 
@@ -81,11 +82,12 @@ public class EtudiantLoginController implements Initializable {
             String[] reponse = iServeur.seConnecter(usernameInput.getText(),passwordInput.getText());
 
             String erreurOuSuccess = reponse[0];
-            String message = reponse[1];
+            String message = reponse[1]; //Pour success ==> le role, pour erreur ==> message d'erreeur
             if(erreurOuSuccess.equals("erreur")){
                 errorMessageLogin.setText(message);
             }else{
                 nom_utilisateur = usernameInput.getText();
+                role = reponse[1];
                 Stage stage = (Stage) annulerButton.getScene().getWindow();
                 stage.close();
 
