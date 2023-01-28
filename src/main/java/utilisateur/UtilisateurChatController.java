@@ -1,4 +1,4 @@
-package etudiant;
+package utilisateur;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -18,7 +18,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -41,7 +40,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-public class EtudiantChatController extends UnicastRemoteObject implements IEtudiant, Initializable {
+public class UtilisateurChatController extends UnicastRemoteObject implements IUtilisateur, Initializable {
     @FXML
     private Label welcomeLabel;
     @FXML
@@ -61,7 +60,9 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
 
     public static String nom_utilisateur = "";
-    public static String role = "Etudiant";
+    public static String role = "";
+
+    public boolean interdit_de_dessiner_dans_le_tableau_blanc = false;
 
     public IServeur iServeur;
 
@@ -71,10 +72,15 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
     FileChooser fileChooser = new FileChooser();
 
-    public EtudiantChatController() throws RemoteException {
+    public UtilisateurChatController() throws RemoteException {
         super();
     }
 
+    /**
+     * l'initialisation de la fenetre
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         String url_rmi = "rmi://127.0.0.1/irisi";
@@ -87,6 +93,8 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
             iServeur = (IServeur) Naming.lookup(url_rmi);
             iServeur.enregistrerUtilisateurDansLaSessionEtEnvoiLaListe(nom_utilisateur);
+            //pour initialiser l'interdit de tableu blanc du Serveur
+            interdit_de_dessiner_dans_le_tableau_blanc = iServeur.voirAuthorisationDeDessinerSurTanleauBlanc();
         } catch (Exception e) {}
 
         welcomeLabel.setText(nom_utilisateur);
@@ -122,13 +130,15 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
         final Button resetButton = new Button("Supprimer Tous");
         resetButton.setOnAction(actionEvent -> {
-            graphicsContext.clearRect(1, 1, graphicsContext.getCanvas().getWidth() - 2,
-                    graphicsContext.getCanvas().getHeight() - 2);
+            if(role.equals("Professeur") || !interdit_de_dessiner_dans_le_tableau_blanc){
+                graphicsContext.clearRect(1, 1, graphicsContext.getCanvas().getWidth() - 2,
+                        graphicsContext.getCanvas().getHeight() - 2);
 
-            try {
-                iServeur.supprimerTousLesDessinsDuTableauBlanc(nom_utilisateur);
-            } catch (RemoteException e) {
-                e.printStackTrace();
+                try {
+                    iServeur.supprimerTousLesDessinsDuTableauBlanc(nom_utilisateur);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }
         });
         resetButton.setTranslateX(10);
@@ -197,36 +207,62 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
         });
         sizeChooser.setTranslateX(5);
 
-        buttonBox.getChildren().addAll(colorChooser, sizeChooser, resetButton);
+        final Button interdirLesEtudiantsADissinerButton = new Button("Interdir");
+        interdirLesEtudiantsADissinerButton.setOnAction(actionEvent -> {
+            try {
+                if(role.equals("Professeur")){
+                    if(interdit_de_dessiner_dans_le_tableau_blanc){
+                        interdirLesEtudiantsADissinerButton.setText("Interdir");
+                    }else {
+                        interdirLesEtudiantsADissinerButton.setText("Authoriser");
+                    }
+                    iServeur.changerAuthorisationDesEtudiantsADissinerDuServeur(!interdit_de_dessiner_dans_le_tableau_blanc);
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        });
+
+        if(role.equals("Professeur")){
+            interdirLesEtudiantsADissinerButton.setVisible(true);
+        }else{
+            interdirLesEtudiantsADissinerButton.setVisible(false);
+        }
+
+        interdirLesEtudiantsADissinerButton.setTranslateX(10);
+
+        buttonBox.getChildren().addAll(colorChooser, sizeChooser, resetButton, interdirLesEtudiantsADissinerButton);
 
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED,
                 new EventHandler<MouseEvent>(){
                     @Override
                     public void handle(MouseEvent event) {
-                        graphicsContext.setStroke(couleurLocaleGraphique);
-                        graphicsContext.setLineWidth(largeurDuLigneGraphique);
+                        if(role.equals("Professeur") || !interdit_de_dessiner_dans_le_tableau_blanc){
+                            graphicsContext.setStroke(couleurLocaleGraphique);
+                            graphicsContext.setLineWidth(largeurDuLigneGraphique);
 
-                        graphicsContext.beginPath();
-                        graphicsContext.moveTo(event.getX(), event.getY());
-                        graphicsContext.stroke();
+                            graphicsContext.beginPath();
+                            graphicsContext.moveTo(event.getX(), event.getY());
+                            graphicsContext.stroke();
 
-                        /**
-                         * Ici j'envoi la premiere position pour eviter un bug
-                         * le bug etait qaund j'envoi la position, la derniere est liéé avec lanciennes
-                         * danc un ligne que je veux pas est dissiné par défaut
-                         * c'est pourquoi il me faut a chaque qulique à indiquer au autres utilisateur
-                         * que voilà la premiere position
-                         */
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    iServeur.envoiLaPremierePositionDuPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(nom_utilisateur,event.getX(),event.getY(),graphicsContext.getLineWidth(), String.valueOf(couleurLocaleGraphique));
-                                } catch (RemoteException e) {
-                                    e.printStackTrace();
+                            /**
+                             * Ici j'envoi la premiere position pour eviter un bug
+                             * le bug etait qaund j'envoi la position, la derniere est liéé avec lanciennes
+                             * danc un ligne que je veux pas est dissiné par défaut
+                             * c'est pourquoi il me faut a chaque qulique à indiquer au autres utilisateur
+                             * que voilà la premiere position
+                             */
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        iServeur.envoiLaPremierePositionDuPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(nom_utilisateur,event.getX(),event.getY(),graphicsContext.getLineWidth(), String.valueOf(couleurLocaleGraphique));
+                                    } catch (RemoteException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 });
 
@@ -234,24 +270,26 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
                 new EventHandler<MouseEvent>(){
                     @Override
                     public void handle(MouseEvent event) {
-                        graphicsContext.setStroke(couleurLocaleGraphique);
-                        graphicsContext.setLineWidth(largeurDuLigneGraphique);
+                        if(role.equals("Professeur") || !interdit_de_dessiner_dans_le_tableau_blanc){
+                            graphicsContext.setStroke(couleurLocaleGraphique);
+                            graphicsContext.setLineWidth(largeurDuLigneGraphique);
 
-                        graphicsContext.lineTo(event.getX(), event.getY());
-                        graphicsContext.stroke();
-                        /**
-                         * Ici j'envoi les positions de dessin au autres utilisateurs avec le couleur et la largeur de ligne
-                         */
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    iServeur.envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(nom_utilisateur,event.getX(),event.getY(),graphicsContext.getLineWidth(), String.valueOf(couleurLocaleGraphique));
-                                } catch (RemoteException e) {
-                                    e.printStackTrace();
+                            graphicsContext.lineTo(event.getX(), event.getY());
+                            graphicsContext.stroke();
+                            /**
+                             * Ici j'envoi les positions de dessin au autres utilisateurs avec le couleur et la largeur de ligne
+                             */
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        iServeur.envoiPartieAjouteeSurLeTableauBlancAuAutresUtilisateurs(nom_utilisateur,event.getX(),event.getY(),graphicsContext.getLineWidth(), String.valueOf(couleurLocaleGraphique));
+                                    } catch (RemoteException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 });
 
@@ -438,6 +476,16 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
     }
 
     /**
+     * Pour interdir ou authoriser les etudiants de dessiner dans le tableau blanc
+     * @param interdit_de_dessiner_dans_le_tableau_blanc
+     * @throws RemoteException
+     */
+    @Override
+    public void reponseDuServeurPourAuthorisationDesEtudiantsADissinerDuServeur(boolean interdit_de_dessiner_dans_le_tableau_blanc) throws RemoteException {
+        this.interdit_de_dessiner_dans_le_tableau_blanc = interdit_de_dessiner_dans_le_tableau_blanc;
+    }
+
+    /**
      * Lorsque on click sur le button choisir un fichier, on selectionne le fichier qu'on veut envoyer
      * et utiliser iServeur.envoiFichierATousLesUtilisateurs pour envoyer le nom de fichier avec le tableau des entiers pour le transfere au fichier
      */
@@ -464,6 +512,8 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
     /**
      * Recevoir le fichier et afficher son nom qui est clickable pour l'enregistrer ou l'afficher
+     * @param nom_utilisateur_source
+     * @param role_utilisateur_source
      * @param inc
      * @param nom_fichier
      * @throws RemoteException

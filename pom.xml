@@ -61,7 +61,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                etudiant.miniprojet2javarmielearning/etudiant.HelloApplication
+                                utilisateur.miniprojet2javarmielearning/utilisateur.HelloApplication
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

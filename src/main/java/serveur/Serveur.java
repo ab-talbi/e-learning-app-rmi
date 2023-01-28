@@ -1,11 +1,6 @@
 package serveur;
 
-import etudiant.IEtudiant;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
-import java.io.Serializable;
+import utilisateur.IUtilisateur;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -17,6 +12,7 @@ import java.util.ArrayList;
 public class Serveur extends UnicastRemoteObject implements IServeur {
 
     private static ArrayList<Session> session = new ArrayList<Session>();
+    private static boolean interdit_de_dessiner_dans_le_tableau_blanc = false;
 
     static final String DB_URL = "jdbc:mysql://localhost:3310/TestUDP";
     static final String USER = "root";
@@ -46,6 +42,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
     public String[] seConnecter(String nom_utilisateur, String mot_de_passe) throws RemoteException, SQLException{
         boolean utilisateur_deja_connecte = false;
         String mot_de_passe_bd = "";
+        String role = "";
         String[] message_de_retour = new String[2];
 
         /**
@@ -60,7 +57,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
 
         if(!utilisateur_deja_connecte){
             /**
-             * Récuperer le mot de passe de cette utilisaateur de la bd
+             * Récuperer le mot de passe de cette utilisaateur et son role de la bd
              */
             Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
             String strSelect = "Select * from registration where username= ?";
@@ -71,11 +68,12 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 mot_de_passe_bd = rs.getString(4);
+                role = rs.getString(5);
             }
 
             if(mot_de_passe.equals(mot_de_passe_bd)){
                 message_de_retour[0] = "success";
-                message_de_retour[1] = "Vous etes connecté";
+                message_de_retour[1] = role;
             }else{
                 message_de_retour[0] = "erreur";
                 message_de_retour[1] = "Nom d'utilisateur ou mot de passe est incorrecte";
@@ -114,17 +112,11 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
      */
     @Override
     public void enregistrerUtilisateurDansLaSessionEtEnvoiLaListe(String nom_utilisateur) throws RemoteException, MalformedURLException, NotBoundException {
-        IEtudiant iEtudiant = ( IEtudiant ) Naming.lookup("rmi://127.0.0.1/" + nom_utilisateur);
-        session.add(new Session(nom_utilisateur,iEtudiant));
+        //ajouter l'utilisateur à la session (son nom d'utilisateur et son interface)
+        IUtilisateur iUtilisateur = (IUtilisateur) Naming.lookup("rmi://127.0.0.1/" + nom_utilisateur);
+        session.add(new Session(nom_utilisateur,iUtilisateur));
 
-        //Test
-        System.out.println("=====Les utilisateurs connectés=====");
-        for (int i = 0 ; i<session.size();i++){
-            System.out.println(session.get(i).toString());
-        }
-        System.out.println("====================================");
-        //End Test
-
+        //modifier la liste des utilisateurs
         for(int i = 0 ; i < session.size() ; i++){
             session.get(i).iEtudiant.modifierLaListeDesUtilisateursDuServeur(getListeUtilisateurs(session.get(i).nom_utilisateur));
         }
@@ -138,21 +130,14 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
      */
     @Override
     public void deconnecterUtilisateur(String nom_utilisateur) throws RemoteException {
+        //retirer l'utilisateur de la session
         for (int i = 0 ; i<session.size();i++){
             if(session.get(i).nom_utilisateur.equals(nom_utilisateur)){
                 session.remove(i);
                 break;
             }
         }
-
-        //Test
-        System.out.println("=====Les utilisateurs connectés=====");
-        for (int i = 0 ; i<session.size();i++){
-            System.out.println(session.get(i).toString());
-        }
-        System.out.println("====================================");
-        //End Test
-
+        //modifier la liste des utilisateurs
         for(int i = 0 ; i < session.size() ; i++){
             session.get(i).iEtudiant.modifierLaListeDesUtilisateursDuServeur(getListeUtilisateurs(session.get(i).nom_utilisateur));
         }
@@ -224,6 +209,37 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
         }
     }
 
+    /**
+     * Envoi de la derniere situation du tableau blanc aux nouvelles utilisateurs,
+     * @return
+     * @throws RemoteException
+     */
+    @Override
+    public boolean voirAuthorisationDeDessinerSurTanleauBlanc() throws RemoteException {
+        return interdit_de_dessiner_dans_le_tableau_blanc;
+    }
+
+    /**
+     * Pour interdir ou authoriser les etudiants à dissiner par le prof
+     * @param nouvelle_valeur
+     * @throws RemoteException
+     */
+    @Override
+    public void changerAuthorisationDesEtudiantsADissinerDuServeur(boolean nouvelle_valeur) throws RemoteException {
+        interdit_de_dessiner_dans_le_tableau_blanc = nouvelle_valeur;
+        for(int i = 0 ; i < session.size() ; i++){
+            session.get(i).iEtudiant.reponseDuServeurPourAuthorisationDesEtudiantsADissinerDuServeur(interdit_de_dessiner_dans_le_tableau_blanc);
+        }
+    }
+
+    /**
+     * transferer le fichieres aux autres utilisateuers
+     * @param nom_utilisateur_source
+     * @param role_utilisateur_source
+     * @param inc
+     * @param nom_fichier
+     * @throws RemoteException
+     */
     @Override
     public void envoiFichierATousLesUtilisateurs(String nom_utilisateur_source,String role_utilisateur_source,ArrayList<Integer> inc, String nom_fichier) throws RemoteException {
         for(int i = 0 ; i < session.size() ; i++){
