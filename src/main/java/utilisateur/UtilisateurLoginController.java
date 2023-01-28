@@ -1,4 +1,4 @@
-package etudiant;
+package utilisateur;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -24,10 +24,10 @@ import java.rmi.NotBoundException;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-import static etudiant.EtudiantChatController.nom_utilisateur;
-import static etudiant.EtudiantChatController.role;
+import static utilisateur.UtilisateurChatController.nom_utilisateur;
+import static utilisateur.UtilisateurChatController.role;
 
-public class EtudiantLoginController implements Initializable {
+public class UtilisateurLoginController implements Initializable {
 
     @FXML
     private Button annulerButton;
@@ -40,7 +40,7 @@ public class EtudiantLoginController implements Initializable {
     @FXML
     private Label errorMessageLogin;
 
-    public EtudiantLoginController() {}
+    public UtilisateurLoginController() {}
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

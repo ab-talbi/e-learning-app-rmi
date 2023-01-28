@@ -1,4 +1,4 @@
-package etudiant;
+package utilisateur;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -40,7 +40,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-public class EtudiantChatController extends UnicastRemoteObject implements IEtudiant, Initializable {
+public class UtilisateurChatController extends UnicastRemoteObject implements IUtilisateur, Initializable {
     @FXML
     private Label welcomeLabel;
     @FXML
@@ -72,10 +72,15 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
     FileChooser fileChooser = new FileChooser();
 
-    public EtudiantChatController() throws RemoteException {
+    public UtilisateurChatController() throws RemoteException {
         super();
     }
 
+    /**
+     * l'initialisation de la fenetre
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         String url_rmi = "rmi://127.0.0.1/irisi";
@@ -472,6 +477,7 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
     /**
      * Pour interdir ou authoriser les etudiants de dessiner dans le tableau blanc
+     * @param interdit_de_dessiner_dans_le_tableau_blanc
      * @throws RemoteException
      */
     @Override
@@ -506,6 +512,8 @@ public class EtudiantChatController extends UnicastRemoteObject implements IEtud
 
     /**
      * Recevoir le fichier et afficher son nom qui est clickable pour l'enregistrer ou l'afficher
+     * @param nom_utilisateur_source
+     * @param role_utilisateur_source
      * @param inc
      * @param nom_fichier
      * @throws RemoteException

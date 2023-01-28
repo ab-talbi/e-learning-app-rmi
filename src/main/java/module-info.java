@@ -4,8 +4,8 @@ module etudiant {
     requires java.rmi;
     requires java.sql;
 
-    exports etudiant;
-    opens etudiant to javafx.fxml;
+    exports utilisateur;
+    opens utilisateur to javafx.fxml;
     exports serveur;
     opens serveur to java.rmi;
 }

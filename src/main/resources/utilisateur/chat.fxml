@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="520.0" prefWidth="733.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="etudiant.EtudiantChatController">
+<AnchorPane prefHeight="520.0" prefWidth="733.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="utilisateur.UtilisateurChatController">
    <children>
       <AnchorPane layoutY="35.0" prefHeight="485.0" prefWidth="137.0" style="-fx-background-color: #002B5B;">
          <children>

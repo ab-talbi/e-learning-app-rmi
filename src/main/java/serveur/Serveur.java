@@ -1,6 +1,6 @@
 package serveur;
 
-import etudiant.IEtudiant;
+import utilisateur.IUtilisateur;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -113,8 +113,8 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
     @Override
     public void enregistrerUtilisateurDansLaSessionEtEnvoiLaListe(String nom_utilisateur) throws RemoteException, MalformedURLException, NotBoundException {
         //ajouter l'utilisateur à la session (son nom d'utilisateur et son interface)
-        IEtudiant iEtudiant = ( IEtudiant ) Naming.lookup("rmi://127.0.0.1/" + nom_utilisateur);
-        session.add(new Session(nom_utilisateur,iEtudiant));
+        IUtilisateur iUtilisateur = (IUtilisateur) Naming.lookup("rmi://127.0.0.1/" + nom_utilisateur);
+        session.add(new Session(nom_utilisateur,iUtilisateur));
 
         //modifier la liste des utilisateurs
         for(int i = 0 ; i < session.size() ; i++){
@@ -221,6 +221,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur {
 
     /**
      * Pour interdir ou authoriser les etudiants à dissiner par le prof
+     * @param nouvelle_valeur
      * @throws RemoteException
      */
     @Override
