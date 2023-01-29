@@ -38,9 +38,9 @@
                   <TextField fx:id="prenom_field" layoutX="116.0" layoutY="67.0" prefHeight="25.0" prefWidth="94.0" promptText="Prenom" />
                   <TextField fx:id="nom_utilisateur_field" layoutX="14.0" layoutY="106.0" prefHeight="25.0" prefWidth="196.0" promptText="Nom d'utilisateur" />
                   <PasswordField fx:id="mot_de_passe_field" layoutX="14.0" layoutY="145.0" prefHeight="25.0" prefWidth="196.0" promptText="Mot de passe" />
-                  <Button fx:id="ajouter_utilisateur_button" layoutX="98.0" layoutY="223.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="112.0" style="-fx-background-color: #F53400;" text="Ajouter" textFill="WHITE" />
+                  <Button fx:id="ajouter_utilisateur_button" layoutX="98.0" layoutY="223.0" mnemonicParsing="false" onAction="#ajouterUnUtilisateurALaBaseDeDonnesOnAction" prefHeight="25.0" prefWidth="112.0" style="-fx-background-color: #F53400;" text="Ajouter" textFill="WHITE" />
                   <ChoiceBox fx:id="choisir_role" layoutX="14.0" layoutY="183.0" prefHeight="25.0" prefWidth="196.0" />
-                  <Button fx:id="initialiser_ajout_utilisateur_button" layoutX="14.0" layoutY="223.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="77.0" text="Initialiser" />
+                  <Button fx:id="initialiser_ajout_utilisateur_button" layoutX="14.0" layoutY="223.0" mnemonicParsing="false" onAction="#initialiserChampsDeAjouterUnUtilisateurOnAction" prefHeight="25.0" prefWidth="77.0" text="Initialiser" />
                   <Label fx:id="erreur_message_ajouter_utilisateur" layoutX="16.0" layoutY="41.0" prefHeight="11.0" prefWidth="196.0" text="erreur message" textFill="#ee5454">
                      <font>
                         <Font name="Arial" size="10.0" />
@@ -58,7 +58,7 @@
                   <TextField fx:id="nom_classe_field" layoutX="14.0" layoutY="67.0" prefHeight="25.0" prefWidth="174.0" promptText="Nom du classe" />
                   <Button fx:id="ajouter_classe_button" layoutX="101.0" layoutY="126.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="221.0" style="-fx-background-color: #F53400;" text="Ajouter la classe" textFill="WHITE" />
                   <ChoiceBox fx:id="choisir_prof" layoutX="195.0" layoutY="67.0" prefHeight="25.0" prefWidth="127.0" />
-                  <Button fx:id="initialiser_classe_button" layoutX="14.0" layoutY="126.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="77.0" text="Initialiser" />
+                  <Button fx:id="initialiser_classe_button" layoutX="14.0" layoutY="126.0" mnemonicParsing="false" onAction="#initialiserChampsDeAjouterUneClasseOnAction" prefHeight="25.0" prefWidth="77.0" text="Initialiser" />
                   <Label layoutX="16.0" layoutY="41.0" prefHeight="15.0" prefWidth="298.0" text="Selectionner les étudiants à ajouter" textFill="#edcf55">
                      <font>
                         <Font name="Arial" size="12.0" />

@@ -28,6 +28,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import serveur.IServeur;
+import serveur.Session;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,10 +58,14 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
     private Canvas canvas;
     @FXML
     private HBox buttonBox;
+    @FXML
+    public ScrollPane messageTextArea;
 
 
     public static String nom_utilisateur = "";
     public static String role = "";
+    public String nom_utilisateur_destination = "";
+    private static ArrayList<UtilisateursDiscussions> utilisateursDiscussions = new ArrayList<UtilisateursDiscussions>();
 
     public boolean interdit_de_dessiner_dans_le_tableau_blanc = false;
 
@@ -128,6 +133,8 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
         graphicsContext.setStroke(couleurLocaleGraphique);
         graphicsContext.setLineWidth(largeurDuLigneGraphique);
 
+        //Les controlleurs de tableau
+
         final Button resetButton = new Button("Supprimer Tous");
         resetButton.setOnAction(actionEvent -> {
             if(role.equals("Professeur") || !interdit_de_dessiner_dans_le_tableau_blanc){
@@ -142,6 +149,7 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
             }
         });
         resetButton.setTranslateX(10);
+
 
         ChoiceBox<String> colorChooser = new ChoiceBox<>(
                 FXCollections.observableArrayList("Noir", "Bleu", "Rouge", "Vert", "Marron", "Orange"));
@@ -340,9 +348,22 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
             textFlow.setMaxWidth(150);
 
             hbox.getChildren().add(textFlow);
-            vBoxMessages.getChildren().add(hbox);
-            //Envoi Message à tous
-            iServeur.envoiMessage(nom_utilisateur,messageInput.getText());
+
+            if(nom_utilisateur_destination.equals("")){
+                vBoxMessages.getChildren().add(hbox);
+                //Envoi Message à tous
+                iServeur.envoiMessage(nom_utilisateur,messageInput.getText());
+            }else{
+                for(int j = 0; j < utilisateursDiscussions.size() ; j++){
+                    if(nom_utilisateur_destination.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
+                        utilisateursDiscussions.get(j).vBox.getChildren().add(hbox);
+                        messageTextArea.setContent(utilisateursDiscussions.get(j).vBox);
+                        utilisateursDiscussions.get(j).vBox.setVisible(true);
+                        //Envoi Message à cet utilisateur
+                        iServeur.envoiMessage(nom_utilisateur,messageInput.getText(),nom_utilisateur_destination);
+                    }
+                }
+            }
 
             messageInput.clear();
         }
@@ -360,12 +381,41 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
+                    //Pour modifier la liste des discussions
+                    for(int i = 0; i < listeUtilisateurs.size(); i++){
+                        for(int j = 0; j < utilisateursDiscussions.size() ; j++){
+                            if(!listeUtilisateurs.get(i).equals(utilisateursDiscussions.get(j).nom_utilisateur)){
+                                VBox newVBox = new VBox();
+                                newVBox.setPadding(new Insets(10, 10, 10, 10));
+                                utilisateursDiscussions.add(new UtilisateursDiscussions(listeUtilisateurs.get(i),newVBox));
+                            }
+                        }
+                    }
+
                     listeAfficheUtilisateurs.getItems().setAll(listeUtilisateurs);
                     listeAfficheUtilisateurs.getItems();
                     listeAfficheUtilisateurs.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
                         @Override
                         public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
 
+                            if(t1 == null){
+                                nom_utilisateur_destination = "";
+                                vBoxMessages.setVisible(true);
+                                for(int j = 0; j < utilisateursDiscussions.size() ; j++){
+                                    utilisateursDiscussions.get(j).vBox.setVisible(false);
+                                }
+                            }else{
+                                nom_utilisateur_destination = t1;
+                                vBoxMessages.setVisible(false);
+                                for(int j = 0; j < utilisateursDiscussions.size() ; j++){
+                                    if(t1.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
+                                        messageTextArea.setContent(utilisateursDiscussions.get(j).vBox);
+                                        utilisateursDiscussions.get(j).vBox.setVisible(true);
+                                    }else{
+                                        utilisateursDiscussions.get(j).vBox.setVisible(false);
+                                    }
+                                }
+                            }
                         }
                     });
                 }
@@ -382,7 +432,7 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
      * @throws RemoteException
      */
     @Override
-    public void recevoirUnMessageDuServeur(String nom_utilisateur, String message) throws RemoteException {
+    public void recevoirUnMessageDuServeur(String nom_utilisateur, String message, String nom_utilisateur_destination) throws RemoteException {
         HBox hbox = new HBox();
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.setPadding(new Insets(5,5,5,10));
@@ -402,7 +452,15 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                vBoxMessages.getChildren().add(hbox);
+                if(!nom_utilisateur_destination.equals(nom_utilisateur)){
+                    vBoxMessages.getChildren().add(hbox);
+                }else{
+                    for(int j = 0; j < utilisateursDiscussions.size() ; j++){
+                        if(nom_utilisateur.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
+                            utilisateursDiscussions.get(j).vBox.getChildren().add(hbox);
+                        }
+                    }
+                }
             }
         });
     }
@@ -618,4 +676,6 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
             }
         });
     }
+
+
 }

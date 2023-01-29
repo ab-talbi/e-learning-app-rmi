@@ -1,6 +1,9 @@
 package serveur;
 
 import utilisateur.IUtilisateur;
+
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -150,7 +153,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
     }
 
     /**
-     * Méthode pour envoyer un message d'un utillisateurs au autres utilisateurs
+     * Méthode pour envoyer un message d'un utillisateur au autres utilisateurs
      * @param nom_utilisateur
      * @param message
      * @throws RemoteException
@@ -159,7 +162,23 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
     public void envoiMessage(String nom_utilisateur, String message) throws RemoteException {
         for(int i = 0 ; i < session.size() ; i++){
             if(!session.get(i).nom_utilisateur.equals(nom_utilisateur)){
-                session.get(i).iEtudiant.recevoirUnMessageDuServeur(nom_utilisateur,message);
+                session.get(i).iEtudiant.recevoirUnMessageDuServeur(nom_utilisateur,message,"C'est un message de groupe");
+            }
+        }
+    }
+
+    /**
+     * Méthode pour envoyer un message d'un utillisateur à un autre
+     * @param nom_utilisateur
+     * @param message
+     * @param nom_utilisateur_destination
+     * @throws RemoteException
+     */
+    @Override
+    public void envoiMessage(String nom_utilisateur, String message, String nom_utilisateur_destination) throws RemoteException {
+        for(int i = 0 ; i < session.size() ; i++){
+            if(session.get(i).nom_utilisateur.equals(nom_utilisateur_destination)){
+                session.get(i).iEtudiant.recevoirUnMessageDuServeur(nom_utilisateur,message,nom_utilisateur_destination);
             }
         }
     }
@@ -258,19 +277,21 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
      */
 
     /**
-     * récuperer les etudiants de la base de donnees
+     * récuperer les utilisateurs de la base de donnees a partir du role passé au parametre
+     * @param role
      * @return
-     * @throws RuntimeException
+     * @throws RemoteException
+     * @throws SQLException
      */
     @Override
-    public ArrayList<String> afficherLaListeDesEtudiants() throws RuntimeException, SQLException {
+    public ArrayList<String> afficherUneListe(String role) throws RemoteException, SQLException {
         ArrayList<String> laListeAEnvoyer = new ArrayList<>();
 
         Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
         String strSelect = "Select * from registration where role= ?";
 
         PreparedStatement st = conn.prepareStatement(strSelect);
-        st.setString(1,"Etudiant");
+        st.setString(1,role);
 
         ResultSet rs = st.executeQuery();
         while (rs.next()) {
@@ -278,5 +299,49 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
         }
 
         return laListeAEnvoyer;
+    }
+
+    /**
+     * Ajouter un utilisateur à la base de donnes
+     * @param nom
+     * @param prenom
+     * @param nom_utilisateur
+     * @param mot_de_passe
+     * @param role_utilisateur
+     * @return
+     * @throws RemoteException
+     * @throws SQLException
+     */
+    @Override
+    public String[] ajouterUnUtilisateurALaBaseDeDonnes(String nom, String prenom, String nom_utilisateur, String mot_de_passe, String role_utilisateur) throws RemoteException, SQLException {
+        String[] message_a_afficher = new String[2];
+
+        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+        Statement stmt = conn.createStatement();
+
+        // Voir est ce que le nom d'utilisateur est disponible
+        String selectQuery = "Select * from registration where username= ?";
+        PreparedStatement st = conn.prepareStatement(selectQuery);
+        st.setString(1,nom_utilisateur);
+
+        ResultSet rs = st.executeQuery();
+        boolean exists = false;
+        while (rs.next()) {
+            exists = true;
+        }
+
+        //Pour envoyer un message à l'utilisateur, soit erreur ou success
+        if(exists){
+            message_a_afficher[0] = "erreur";
+            message_a_afficher[1] = "Le nom d'utilisateur n'est pas disponible";
+        }else{
+            String insertQuery = "INSERT INTO registration VALUES ('"+nom_utilisateur+"','"+nom+"','"+prenom+"','"+mot_de_passe+"','"+role_utilisateur+"')";
+            stmt.executeUpdate(insertQuery);
+
+            message_a_afficher[0] = "success";
+            message_a_afficher[1] = "L'utilisateur est crée avec succes";
+        }
+
+        return message_a_afficher;
     }
 }
