@@ -13,4 +13,9 @@
       <module name="mini-projet2-java-rmi-e-learning" target="17" />
     </bytecodeTargetLevel>
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="mini-projet2-java-rmi-e-learning" options="--add-exports java.base/javax=etudiant --add-exports java.desktop/javax.sound=etudiant" />
+    </option>
+  </component>
 </project>
