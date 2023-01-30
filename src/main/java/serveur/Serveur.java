@@ -2,8 +2,6 @@ package serveur;
 
 import utilisateur.IUtilisateur;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;

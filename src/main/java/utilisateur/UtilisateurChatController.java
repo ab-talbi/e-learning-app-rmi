@@ -353,6 +353,13 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
 
             hbox.getChildren().add(textFlow);
 
+            hbox.heightProperty().addListener(new ChangeListener() {
+                @Override
+                public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                    messageTextArea.setVvalue((Double)newValue );
+                }
+            });
+
             System.out.println("I AM SENDING A MESSAGE");
             for (int i=0;i<utilisateursDiscussions.size();i++){
                 System.out.println(utilisateursDiscussions.get(i).nom_utilisateur);
@@ -461,24 +468,47 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.setPadding(new Insets(5,5,5,10));
 
-        Text textNomUtilisateur = new Text(nom_utilisateur+"\n");
-        Text textMessage = new Text(message);
-
-        textNomUtilisateur.setFill(Color.web("002B5B"));
-
-        TextFlow textFlow = new TextFlow(textNomUtilisateur,textMessage);
-        textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
-        textFlow.setPadding(new Insets(5,10,5,10));
-        textFlow.setMaxWidth(150);
-
-        hbox.getChildren().add(textFlow);
-
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 if(nom_utilisateur_destination.equals("C'est un message de groupe")){
+                    Text textNomUtilisateur = new Text(nom_utilisateur+"\n");
+                    Text textMessage = new Text(message);
+
+                    textNomUtilisateur.setFill(Color.web("002B5B"));
+
+                    TextFlow textFlow = new TextFlow(textNomUtilisateur,textMessage);
+                    textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
+                    textFlow.setPadding(new Insets(5,10,5,10));
+                    textFlow.setMaxWidth(150);
+
+                    hbox.getChildren().add(textFlow);
+
+                    hbox.heightProperty().addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                            messageTextArea.setVvalue((Double)newValue );
+                        }
+                    });
+
                     vBoxMessages.getChildren().add(hbox);
                 }else{
+                    Text textMessage = new Text(message);
+
+                    TextFlow textFlow = new TextFlow(textMessage);
+                    textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
+                    textFlow.setPadding(new Insets(5,10,5,10));
+                    textFlow.setMaxWidth(150);
+
+                    hbox.getChildren().add(textFlow);
+
+                    hbox.heightProperty().addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                            messageTextArea.setVvalue((Double)newValue );
+                        }
+                    });
+
                     for(int j = 0; j < utilisateursDiscussions.size() ; j++){
                         if(nom_utilisateur.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
                             utilisateursDiscussions.get(j).vBox.getChildren().add(hbox);

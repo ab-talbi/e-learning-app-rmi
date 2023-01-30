@@ -41,7 +41,7 @@
             </Button>
             <ScrollPane fx:id="messageTextArea" layoutX="4.0" layoutY="38.0" prefHeight="385.0" prefWidth="282.0">
                <content>
-                  <VBox fx:id="vBoxMessages" prefHeight="379.0" prefWidth="278.0" />
+                  <VBox fx:id="vBoxMessages" prefHeight="374.0" prefWidth="271.0" />
                </content>
             </ScrollPane>
             <Button fx:id="labelButton" layoutX="5.0" layoutY="4.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="282.0" style="-fx-background-color: #FFFFFF;" textFill="#040043">
