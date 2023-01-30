@@ -267,10 +267,23 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
      * @throws RemoteException
      */
     @Override
-    public void envoiFichierATousLesUtilisateurs(String nom_utilisateur_source,String role_utilisateur_source,ArrayList<Integer> inc, String nom_fichier) throws RemoteException {
-        for(int i = 0 ; i < session.size() ; i++){
-            session.get(i).iEtudiant.recevoirFichierDuServeur(nom_utilisateur_source,role_utilisateur_source,inc,nom_fichier);
+    public void envoiFichier(String zone_discussion_ou_partage, String nom_utilisateur_source,String role_utilisateur_source,ArrayList<Integer> inc, String nom_fichier, String nom_utilisateur_destination) throws RemoteException {
+        if(zone_discussion_ou_partage.equals("Zone_de_partage")){
+            for(int i = 0 ; i < session.size() ; i++){
+                session.get(i).iEtudiant.recevoirFichierDuServeurPourZoneDePartage(nom_utilisateur_source,role_utilisateur_source,inc,nom_fichier);
+            }
+        }else if(nom_utilisateur_destination.equals("")){
+            for(int i = 0 ; i < session.size() ; i++){
+                session.get(i).iEtudiant.recevoirFichierDuServeurPourZoneDeDiscussion(nom_utilisateur_source,role_utilisateur_source,inc,nom_fichier,nom_utilisateur_destination);
+            }
+        }else{
+            for(int i = 0 ; i < session.size() ; i++){
+                if(nom_utilisateur_destination.equals(session.get(i).nom_utilisateur) || nom_utilisateur_source.equals(session.get(i).nom_utilisateur)){
+                    session.get(i).iEtudiant.recevoirFichierDuServeurPourZoneDeDiscussion(nom_utilisateur_source,role_utilisateur_source,inc,nom_fichier,nom_utilisateur_destination);
+                }
+            }
         }
+
     }
 
     /**
