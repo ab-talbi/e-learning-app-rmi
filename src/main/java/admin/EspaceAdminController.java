@@ -48,11 +48,14 @@ public class EspaceAdminController implements Initializable {
     @FXML
     private ChoiceBox choisir_prof;
     @FXML
+    private ChoiceBox choisir_classe;
+    @FXML
     private Label erreur_message_classe;
 
     ArrayList<String> listeEtudiants;
-    ArrayList<String> listeEtudiantsSelectionne;
+    ArrayList<String> listeEtudiantsSelectionne = new ArrayList<>();
     ArrayList<String> listeProfesseurs;
+    ArrayList<String> listeClasses;
 
     public static String nom_utilisateur = "";
 
@@ -78,6 +81,7 @@ public class EspaceAdminController implements Initializable {
         try {
             listeEtudiants = iServeurPourAdmin.afficherUneListe("Etudiant");
             listeProfesseurs = iServeurPourAdmin.afficherUneListe("Professeur");
+            listeClasses = iServeurPourAdmin.afficherUneListe("Classe");
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (RemoteException e) {
@@ -99,6 +103,12 @@ public class EspaceAdminController implements Initializable {
         //initialisation choisir_prof
         for (String professeur : listeProfesseurs) {
             choisir_prof.getItems().add(professeur);
+        }
+
+        //initialisation choisir_classe
+        for (String classe : listeClasses) {
+            System.out.println(classe);
+            choisir_classe.getItems().add(classe);
         }
 
     }
@@ -142,6 +152,7 @@ public class EspaceAdminController implements Initializable {
                         }
                     });
 
+                    /*
                     listeAfficheUtilisateurs.setOnMouseClicked(new EventHandler<Event>() {
 
                         @Override
@@ -149,15 +160,26 @@ public class EspaceAdminController implements Initializable {
                             ObservableList<String> selectedItems =  listeAfficheUtilisateurs.getSelectionModel().getSelectedItems();
 
                             if(listeEtudiantsSelectionne != null){
-                                listeEtudiantsSelectionne.clear();
+                                System.out.println("--------------------------");
+                                for (int i = 0 ; i < listeEtudiantsSelectionne.size() ; i++){
+                                    listeEtudiantsSelectionne.remove(i);
+                                }
+                            }
+                            System.out.println("BEFOOOOOOOOOOOOOOOOOOOOOOORE");
+                            for(String s : listeEtudiantsSelectionne){
+                                System.out.println(s);
                             }
                             for(String s : selectedItems){
                                 listeEtudiantsSelectionne.add(s);
                             }
+                            System.out.println("AFTEEEEEEEEEEEEEEEEEEEEEEEEER");
+                            for(String s : listeEtudiantsSelectionne){
+                                System.out.println(s);
+                            }
                         }
 
                     });
-
+                    */
                 }
             });
         }else{
@@ -171,11 +193,16 @@ public class EspaceAdminController implements Initializable {
      */
     public void ajouterUnUtilisateurALaBaseDeDonnesOnAction() throws RemoteException, SQLException {
         String role_utilisateur = (String) choisir_role.getValue();
+        String nom_classe = (String) choisir_classe.getValue();
+        if(nom_classe == null){
+            nom_classe = "";
+        }
+
         if(nom_field.getText().isBlank() == true || nom_utilisateur_field.getText().isBlank() == true || prenom_field.getText().isBlank() == true || mot_de_passe_field.getText().isBlank() == true || role_utilisateur == null){
             erreur_message_ajouter_utilisateur.setTextFill(Color.web("#FF3030"));
             erreur_message_ajouter_utilisateur.setText("Tous les champs sont obligatoires");
         }else{
-            String[] reponse = iServeurPourAdmin.ajouterUnUtilisateurALaBaseDeDonnes(nom_field.getText(),prenom_field.getText(), nom_utilisateur_field.getText(),mot_de_passe_field.getText(), role_utilisateur);
+            String[] reponse = iServeurPourAdmin.ajouterUnUtilisateurALaBaseDeDonnes(nom_field.getText(),prenom_field.getText(), nom_utilisateur_field.getText(),mot_de_passe_field.getText(), role_utilisateur, nom_classe);
 
             if(reponse[0].equals("erreur")){
                 erreur_message_ajouter_utilisateur.setTextFill(Color.web("#FF3030"));
@@ -222,8 +249,46 @@ public class EspaceAdminController implements Initializable {
     }
 
     /**
-     * Ici je veux traiter l'ajout du classe (apres)...
+     * pour ajouter une classe à la base de donnés
      */
+    public void ajouterUneClasseOnAction() throws RemoteException, SQLException {
+        String nom_classe = nom_classe_field.getText();
+        String nom_prof_associe = (String) choisir_prof.getValue();
+
+        if (nom_classe_field.getText().isBlank() == true || nom_prof_associe == null) {
+            erreur_message_classe.setTextFill(Color.web("#FF3030"));
+            erreur_message_classe.setText("Tous les champs sont obligatoires");
+        } else {
+            String[] reponse = iServeurPourAdmin.ajouterUneClasseALaBaseDeDonnes(nom_classe, nom_prof_associe);
+
+            if (reponse[0].equals("erreur")) {
+                erreur_message_classe.setTextFill(Color.web("#FF3030"));
+            } else {
+                erreur_message_classe.setTextFill(Color.web("#79FC3C"));
+
+                if(listeClasses != null){
+                    listeClasses.clear();
+                }
+                try {
+                    listeClasses = iServeurPourAdmin.afficherUneListe("Classe");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+                choisir_classe.getSelectionModel().clearSelection();
+                choisir_classe.getItems().clear();
+                for (String classe : listeClasses) {
+                    System.out.println(classe);
+                    choisir_classe.getItems().add(classe);
+                }
+
+            }
+            //initialiser les champs
+            initialiserChampsDeAjouterUneClasse();
+            erreur_message_classe.setText(reponse[1]);
+        }
+    }
 
     /**
      * initialiser tous les champs d'ajout d'un utilisateur sans le message
