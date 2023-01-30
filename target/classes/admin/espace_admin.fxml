@@ -27,8 +27,9 @@
       </AnchorPane>
       <AnchorPane fx:id="discussionPane" layoutX="174.0" layoutY="35.0" prefHeight="485.0" prefWidth="559.0" style="-fx-background-color: #E3E3E3;">
          <children>
-            <AnchorPane layoutX="338.0" layoutY="1.0" prefHeight="262.0" prefWidth="221.0" style="-fx-background-color: #1C1921;">
+            <AnchorPane layoutX="338.0" layoutY="1.0" prefHeight="377.0" prefWidth="221.0" style="-fx-background-color: #1C1921;">
                <children>
+                  <ChoiceBox fx:id="choisir_classe" layoutX="14.0" layoutY="222.0" prefHeight="25.0" prefWidth="196.0" />
                   <Label layoutX="38.0" layoutY="14.0" text="Ajouter un utilisateur" textFill="WHITE">
                      <font>
                         <Font name="Arial Black" size="13.0" />
@@ -38,39 +39,69 @@
                   <TextField fx:id="prenom_field" layoutX="116.0" layoutY="67.0" prefHeight="25.0" prefWidth="94.0" promptText="Prenom" />
                   <TextField fx:id="nom_utilisateur_field" layoutX="14.0" layoutY="106.0" prefHeight="25.0" prefWidth="196.0" promptText="Nom d'utilisateur" />
                   <PasswordField fx:id="mot_de_passe_field" layoutX="14.0" layoutY="145.0" prefHeight="25.0" prefWidth="196.0" promptText="Mot de passe" />
-                  <Button fx:id="ajouter_utilisateur_button" layoutX="98.0" layoutY="223.0" mnemonicParsing="false" onAction="#ajouterUnUtilisateurALaBaseDeDonnesOnAction" prefHeight="25.0" prefWidth="112.0" style="-fx-background-color: #F53400;" text="Ajouter" textFill="WHITE" />
+                  <Button fx:id="ajouter_utilisateur_button" layoutX="98.0" layoutY="337.0" mnemonicParsing="false" onAction="#ajouterUnUtilisateurALaBaseDeDonnesOnAction" prefHeight="25.0" prefWidth="112.0" style="-fx-background-color: #F53400;" text="Ajouter" textFill="WHITE" />
                   <ChoiceBox fx:id="choisir_role" layoutX="14.0" layoutY="183.0" prefHeight="25.0" prefWidth="196.0" />
-                  <Button fx:id="initialiser_ajout_utilisateur_button" layoutX="14.0" layoutY="223.0" mnemonicParsing="false" onAction="#initialiserChampsDeAjouterUnUtilisateurOnAction" prefHeight="25.0" prefWidth="77.0" text="Initialiser" />
-                  <Label fx:id="erreur_message_ajouter_utilisateur" layoutX="16.0" layoutY="41.0" prefHeight="11.0" prefWidth="196.0" text="erreur message" textFill="#ee5454">
+                  <Button fx:id="initialiser_ajout_utilisateur_button" layoutX="14.0" layoutY="337.0" mnemonicParsing="false" onAction="#initialiserChampsDeAjouterUnUtilisateurOnAction" prefHeight="25.0" prefWidth="77.0" text="Initialiser" />
+                  <Label fx:id="erreur_message_ajouter_utilisateur" layoutX="16.0" layoutY="42.0" prefHeight="11.0" prefWidth="196.0" text="erreur message" textFill="#ee5454">
+                     <font>
+                        <Font name="Arial" size="10.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="15.0" layoutY="264.0" prefHeight="11.0" prefWidth="196.0" text="NB : pour la classe, meme si vous  avez" textFill="#ee5454">
+                     <font>
+                        <Font name="Arial" size="10.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="37.0" layoutY="276.0" prefHeight="11.0" prefWidth="161.0" text="choisi une pour un admin ou pour " textFill="#ee5454">
+                     <font>
+                        <Font name="Arial" size="10.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="37.0" layoutY="287.0" prefHeight="11.0" prefWidth="161.0" text="un prof, ne sera pas affecté à cet" textFill="#ee5454">
+                     <font>
+                        <Font name="Arial" size="10.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="37.0" layoutY="298.0" prefHeight="11.0" prefWidth="151.0" text="utilisateur. " textFill="#ee5454">
+                     <font>
+                        <Font name="Arial" size="10.0" />
+                     </font>
+                  </Label>
+                  <Label layoutX="37.0" layoutY="309.0" prefHeight="11.0" prefWidth="161.0" text="c'est seulement pour un étudiant" textFill="#ee5454">
                      <font>
                         <Font name="Arial" size="10.0" />
                      </font>
                   </Label>
                </children>
             </AnchorPane>
-            <AnchorPane layoutX="1.0" layoutY="1.0" prefHeight="165.0" prefWidth="336.0" style="-fx-background-color: #1C1921;">
+            <AnchorPane layoutX="1.0" layoutY="1.0" prefHeight="185.0" prefWidth="336.0" style="-fx-background-color: #1C1921;">
                <children>
-                  <Label layoutX="70.0" layoutY="14.0" text="Ajouter une classe virtuelle" textFill="WHITE">
+                  <Label layoutX="70.0" layoutY="24.0" text="Ajouter une classe virtuelle" textFill="WHITE">
                      <font>
                         <Font name="Arial Black" size="13.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="nom_classe_field" layoutX="14.0" layoutY="67.0" prefHeight="25.0" prefWidth="174.0" promptText="Nom du classe" />
-                  <Button fx:id="ajouter_classe_button" layoutX="101.0" layoutY="126.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="221.0" style="-fx-background-color: #F53400;" text="Ajouter la classe" textFill="WHITE" />
-                  <ChoiceBox fx:id="choisir_prof" layoutX="195.0" layoutY="67.0" prefHeight="25.0" prefWidth="127.0" />
-                  <Button fx:id="initialiser_classe_button" layoutX="14.0" layoutY="126.0" mnemonicParsing="false" onAction="#initialiserChampsDeAjouterUneClasseOnAction" prefHeight="25.0" prefWidth="77.0" text="Initialiser" />
-                  <Label layoutX="16.0" layoutY="41.0" prefHeight="15.0" prefWidth="298.0" text="Selectionner les étudiants à ajouter" textFill="#edcf55">
-                     <font>
-                        <Font name="Arial" size="12.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="erreur_message_classe" layoutX="15.0" layoutY="103.0" prefHeight="11.0" prefWidth="307.0" text="erreur message" textFill="#ee5454">
+                  <Button fx:id="ajouter_classe_button" layoutX="101.0" layoutY="149.0" mnemonicParsing="false" onAction="#ajouterUneClasseOnAction" prefHeight="25.0" prefWidth="221.0" style="-fx-background-color: #F53400;" text="Ajouter la classe" textFill="WHITE" />
+                  <TextField fx:id="nom_classe_field" layoutX="14.0" layoutY="80.0" prefHeight="25.0" prefWidth="174.0" promptText="Nom du classe" />
+                  <ChoiceBox fx:id="choisir_prof" layoutX="195.0" layoutY="80.0" prefHeight="25.0" prefWidth="127.0" />
+                  <Button fx:id="initialiser_classe_button" layoutX="14.0" layoutY="149.0" mnemonicParsing="false" onAction="#initialiserChampsDeAjouterUneClasseOnAction" prefHeight="25.0" prefWidth="77.0" text="Initialiser" />
+                  <Label fx:id="erreur_message_classe" layoutX="15.0" layoutY="50.0" prefHeight="11.0" prefWidth="307.0" text="erreur message" textFill="#ee5454">
                      <font>
                         <Font name="Arial" size="10.0" />
                      </font>
                   </Label>
                </children>
             </AnchorPane>
+            <Label layoutX="16.0" layoutY="117.0" prefHeight="11.0" prefWidth="307.0" text="NB : un seul prof peut etre associé à une classe, et ce prof peut pas " textFill="#ee5454">
+               <font>
+                  <Font name="Arial" size="10.0" />
+               </font>
+            </Label>
+            <Label layoutX="38.0" layoutY="128.0" prefHeight="11.0" prefWidth="283.0" text="etre associe à une autre classe" textFill="#ee5454">
+               <font>
+                  <Font name="Arial" size="10.0" />
+               </font>
+            </Label>
          </children>
       </AnchorPane>
       <AnchorPane prefHeight="35.0" prefWidth="733.0" style="-fx-background-color: #1C1921;">

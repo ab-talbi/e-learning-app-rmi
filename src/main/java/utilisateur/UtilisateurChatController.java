@@ -776,7 +776,6 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
                     }
                 }
             });
-
         }else{
             hbox.setAlignment(Pos.CENTER_LEFT);
 

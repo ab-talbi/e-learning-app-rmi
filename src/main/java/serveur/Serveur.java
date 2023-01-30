@@ -292,24 +292,35 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
 
     /**
      * récuperer les utilisateurs de la base de donnees a partir du role passé au parametre
-     * @param role
+     * @param role_ou_classe
      * @return
      * @throws RemoteException
      * @throws SQLException
      */
     @Override
-    public ArrayList<String> afficherUneListe(String role) throws RemoteException, SQLException {
+    public ArrayList<String> afficherUneListe(String role_ou_classe) throws RemoteException, SQLException {
         ArrayList<String> laListeAEnvoyer = new ArrayList<>();
-
         Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-        String strSelect = "Select * from registration where role= ?";
 
-        PreparedStatement st = conn.prepareStatement(strSelect);
-        st.setString(1,role);
+        if(role_ou_classe.equals("Classe")){
+            String strSelect = "Select * from classes";
 
-        ResultSet rs = st.executeQuery();
-        while (rs.next()) {
-            laListeAEnvoyer.add(rs.getString("nom_utilisateur"));
+            PreparedStatement st = conn.prepareStatement(strSelect);
+
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                laListeAEnvoyer.add(rs.getString("nom_classe"));
+            }
+        }else{
+            String strSelect = "Select * from registration where role= ?";
+
+            PreparedStatement st = conn.prepareStatement(strSelect);
+            st.setString(1,role_ou_classe);
+
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                laListeAEnvoyer.add(rs.getString("nom_utilisateur"));
+            }
         }
 
         return laListeAEnvoyer;
@@ -327,7 +338,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
      * @throws SQLException
      */
     @Override
-    public String[] ajouterUnUtilisateurALaBaseDeDonnes(String nom, String prenom, String nom_utilisateur, String mot_de_passe, String role_utilisateur) throws RemoteException, SQLException {
+    public String[] ajouterUnUtilisateurALaBaseDeDonnes(String nom, String prenom, String nom_utilisateur, String mot_de_passe, String role_utilisateur, String nom_classe) throws RemoteException, SQLException {
         String[] message_a_afficher = new String[2];
 
         Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
@@ -349,11 +360,71 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
             message_a_afficher[0] = "erreur";
             message_a_afficher[1] = "Le nom d'utilisateur n'est pas disponible";
         }else{
-            String insertQuery = "INSERT INTO registration VALUES ('"+nom_utilisateur+"','"+nom+"','"+prenom+"','"+motDePasseHashing(mot_de_passe)+"','"+role_utilisateur+"')";
+            if(role_utilisateur.equals("Professeur") || role_utilisateur.equals("Admin")){
+                nom_classe = "";
+                String insertQuery = "INSERT INTO registration VALUES ('"+nom_utilisateur+"','"+nom+"','"+prenom+"','"+motDePasseHashing(mot_de_passe)+"','"+role_utilisateur+"','"+nom_classe+"')";
+                stmt.executeUpdate(insertQuery);
+
+                message_a_afficher[0] = "success";
+                message_a_afficher[1] = "L'utilisateur est crée avec succes";
+            }else{
+                if(nom_classe.equals("")){
+                    message_a_afficher[0] = "erreur";
+                    message_a_afficher[1] = "Pour un étudiant il faut choisir une classe";
+                }else{
+                    String insertQuery = "INSERT INTO registration VALUES ('"+nom_utilisateur+"','"+nom+"','"+prenom+"','"+motDePasseHashing(mot_de_passe)+"','"+role_utilisateur+"','"+nom_classe+"')";
+                    stmt.executeUpdate(insertQuery);
+
+                    message_a_afficher[0] = "success";
+                    message_a_afficher[1] = "L'utilisateur est crée avec succes";
+                }
+            }
+        }
+
+        return message_a_afficher;
+    }
+
+    @Override
+    public String[] ajouterUneClasseALaBaseDeDonnes(String nom_classe, String nom_prof_associe) throws RemoteException, SQLException {
+        String[] message_a_afficher = new String[2];
+
+        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+        Statement stmt = conn.createStatement();
+
+        // Voir est ce que le nom de la classe est disponible
+        String selectQuery = "Select * from classes where nom_classe= ?";
+        PreparedStatement st = conn.prepareStatement(selectQuery);
+        st.setString(1,nom_classe);
+
+        ResultSet rs = st.executeQuery();
+        boolean exists_nom = false;
+        while (rs.next()) {
+            exists_nom = true;
+        }
+        // Voir est ce que le prof est disponible (le prof peut etre dans une seule classe)
+        String selectQuery1 = "Select * from classes where nom_prof_associe= ?";
+        PreparedStatement st1 = conn.prepareStatement(selectQuery1);
+        st1.setString(1,nom_prof_associe);
+
+        ResultSet rs1 = st1.executeQuery();
+        boolean exists_prof = false;
+        while (rs1.next()) {
+            exists_prof = true;
+        }
+
+        //Pour envoyer un message à l'admin, soit erreur ou success
+        if(exists_nom){
+            message_a_afficher[0] = "erreur";
+            message_a_afficher[1] = "Le nom de cette classe n'est pas disponible";
+        }else if(exists_prof){
+            message_a_afficher[0] = "erreur";
+            message_a_afficher[1] = "Le prof n'est pas disponible pour cette classe";
+        }else{
+            String insertQuery = "INSERT INTO classes VALUES ('"+nom_classe+"','"+nom_prof_associe+"')";
             stmt.executeUpdate(insertQuery);
 
             message_a_afficher[0] = "success";
-            message_a_afficher[1] = "L'utilisateur est crée avec succes";
+            message_a_afficher[1] = "La classe a etait crée avec succes";
         }
 
         return message_a_afficher;
