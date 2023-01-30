@@ -60,6 +60,8 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
     private HBox buttonBox;
     @FXML
     public ScrollPane messageTextArea;
+    @FXML
+    private Button labelButton;
 
 
     public static String nom_utilisateur = "";
@@ -115,6 +117,8 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
         });
 
         initialisationTableauBlanc();
+
+        labelButton.setText("Tous les utilisateurs ici");
     }
 
     /**
@@ -349,18 +353,23 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
 
             hbox.getChildren().add(textFlow);
 
+            System.out.println("I AM SENDING A MESSAGE");
+            for (int i=0;i<utilisateursDiscussions.size();i++){
+                System.out.println(utilisateursDiscussions.get(i).nom_utilisateur);
+            }
+
             if(nom_utilisateur_destination.equals("")){
                 vBoxMessages.getChildren().add(hbox);
+                messageTextArea.setContent(vBoxMessages);
                 //Envoi Message à tous
                 iServeur.envoiMessage(nom_utilisateur,messageInput.getText());
             }else{
                 for(int j = 0; j < utilisateursDiscussions.size() ; j++){
                     if(nom_utilisateur_destination.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
                         utilisateursDiscussions.get(j).vBox.getChildren().add(hbox);
-                        messageTextArea.setContent(utilisateursDiscussions.get(j).vBox);
-                        utilisateursDiscussions.get(j).vBox.setVisible(true);
                         //Envoi Message à cet utilisateur
                         iServeur.envoiMessage(nom_utilisateur,messageInput.getText(),nom_utilisateur_destination);
+                        System.out.println("Message envoiyé à : "+nom_utilisateur_destination +" ==> "+messageInput.getText());
                     }
                 }
             }
@@ -378,19 +387,29 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
     @Override
     public void modifierLaListeDesUtilisateursDuServeur(ArrayList<String> listeUtilisateurs) throws RemoteException {
         if(listeUtilisateurs != null){
+            //Pour modifier la liste des discussions
+            for(int i = 0; i < listeUtilisateurs.size(); i++){
+                VBox newVBox = new VBox();
+                newVBox.setPadding(new Insets(10, 10, 10, 10));
+                newVBox.setPrefWidth(278);
+                int count = 0;
+                if(utilisateursDiscussions.size()>0){
+                    for(int j = 0; j < utilisateursDiscussions.size() ; j++){
+                        if(listeUtilisateurs.get(i).equals(utilisateursDiscussions.get(j).nom_utilisateur)){
+                            count = 1; //deja existe on ne va pas creer un autre
+                        }
+                    }
+                    if(count != 1){
+                        utilisateursDiscussions.add(new UtilisateursDiscussions(listeUtilisateurs.get(i),newVBox));
+                    }
+                }else{
+                    utilisateursDiscussions.add(new UtilisateursDiscussions(listeUtilisateurs.get(i),newVBox));
+                }
+            }
+
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    //Pour modifier la liste des discussions
-                    for(int i = 0; i < listeUtilisateurs.size(); i++){
-                        for(int j = 0; j < utilisateursDiscussions.size() ; j++){
-                            if(!listeUtilisateurs.get(i).equals(utilisateursDiscussions.get(j).nom_utilisateur)){
-                                VBox newVBox = new VBox();
-                                newVBox.setPadding(new Insets(10, 10, 10, 10));
-                                utilisateursDiscussions.add(new UtilisateursDiscussions(listeUtilisateurs.get(i),newVBox));
-                            }
-                        }
-                    }
 
                     listeAfficheUtilisateurs.getItems().setAll(listeUtilisateurs);
                     listeAfficheUtilisateurs.getItems();
@@ -400,12 +419,17 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
 
                             if(t1 == null){
                                 nom_utilisateur_destination = "";
+                                labelButton.setText("Tous les utilisateurs ici");
+
                                 vBoxMessages.setVisible(true);
+                                messageTextArea.setContent(vBoxMessages);
                                 for(int j = 0; j < utilisateursDiscussions.size() ; j++){
                                     utilisateursDiscussions.get(j).vBox.setVisible(false);
                                 }
                             }else{
                                 nom_utilisateur_destination = t1;
+                                labelButton.setText("La discussion vers "+t1);
+
                                 vBoxMessages.setVisible(false);
                                 for(int j = 0; j < utilisateursDiscussions.size() ; j++){
                                     if(t1.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
@@ -452,12 +476,13 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                if(!nom_utilisateur_destination.equals(nom_utilisateur)){
+                if(nom_utilisateur_destination.equals("C'est un message de groupe")){
                     vBoxMessages.getChildren().add(hbox);
                 }else{
                     for(int j = 0; j < utilisateursDiscussions.size() ; j++){
                         if(nom_utilisateur.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
                             utilisateursDiscussions.get(j).vBox.getChildren().add(hbox);
+                            System.out.println("Message arrivee de : "+nom_utilisateur+" ==> "+message);
                         }
                     }
                 }
