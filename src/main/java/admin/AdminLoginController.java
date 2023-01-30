@@ -89,7 +89,7 @@ public class AdminLoginController implements Initializable {
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("espace_admin.fxml"));
                     Scene scene = new Scene(fxmlLoader.load(), 733, 520);
                     Stage newStage = new Stage();
-                    newStage.setTitle("Chat");
+                    newStage.setTitle("Espace Admin");
                     newStage.setScene(scene);
                     newStage.show();
                 }else{

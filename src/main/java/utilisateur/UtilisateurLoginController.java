@@ -94,7 +94,7 @@ public class UtilisateurLoginController implements Initializable {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("chat.fxml"));
                 Scene scene = new Scene(fxmlLoader.load(), 733, 520);
                 Stage newStage = new Stage();
-                newStage.setTitle("Chat");
+                newStage.setTitle("Espace de l'utilisateur "+nom_utilisateur);
                 newStage.setScene(scene);
                 newStage.show();
             }

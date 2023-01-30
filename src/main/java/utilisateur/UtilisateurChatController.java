@@ -62,6 +62,8 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
     public ScrollPane messageTextArea;
     @FXML
     private Button labelButton;
+    @FXML
+    private Button choisirUnFichierButton;
 
 
     public static String nom_utilisateur = "";
@@ -119,6 +121,12 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
         initialisationTableauBlanc();
 
         labelButton.setText("Tous les utilisateurs ici");
+
+        if(role.equals("Professeur")){
+            choisirUnFichierButton.setVisible(true);
+        }else{
+            choisirUnFichierButton.setVisible(false);
+        }
     }
 
     /**
@@ -353,6 +361,13 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
 
             hbox.getChildren().add(textFlow);
 
+            hbox.heightProperty().addListener(new ChangeListener() {
+                @Override
+                public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                    messageTextArea.setVvalue((Double)newValue );
+                }
+            });
+
             System.out.println("I AM SENDING A MESSAGE");
             for (int i=0;i<utilisateursDiscussions.size();i++){
                 System.out.println(utilisateursDiscussions.get(i).nom_utilisateur);
@@ -461,24 +476,47 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.setPadding(new Insets(5,5,5,10));
 
-        Text textNomUtilisateur = new Text(nom_utilisateur+"\n");
-        Text textMessage = new Text(message);
-
-        textNomUtilisateur.setFill(Color.web("002B5B"));
-
-        TextFlow textFlow = new TextFlow(textNomUtilisateur,textMessage);
-        textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
-        textFlow.setPadding(new Insets(5,10,5,10));
-        textFlow.setMaxWidth(150);
-
-        hbox.getChildren().add(textFlow);
-
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 if(nom_utilisateur_destination.equals("C'est un message de groupe")){
+                    Text textNomUtilisateur = new Text(nom_utilisateur+"\n");
+                    Text textMessage = new Text(message);
+
+                    textNomUtilisateur.setFill(Color.web("002B5B"));
+
+                    TextFlow textFlow = new TextFlow(textNomUtilisateur,textMessage);
+                    textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
+                    textFlow.setPadding(new Insets(5,10,5,10));
+                    textFlow.setMaxWidth(150);
+
+                    hbox.getChildren().add(textFlow);
+
+                    hbox.heightProperty().addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                            messageTextArea.setVvalue((Double)newValue );
+                        }
+                    });
+
                     vBoxMessages.getChildren().add(hbox);
                 }else{
+                    Text textMessage = new Text(message);
+
+                    TextFlow textFlow = new TextFlow(textMessage);
+                    textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
+                    textFlow.setPadding(new Insets(5,10,5,10));
+                    textFlow.setMaxWidth(150);
+
+                    hbox.getChildren().add(textFlow);
+
+                    hbox.heightProperty().addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                            messageTextArea.setVvalue((Double)newValue );
+                        }
+                    });
+
                     for(int j = 0; j < utilisateursDiscussions.size() ; j++){
                         if(nom_utilisateur.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
                             utilisateursDiscussions.get(j).vBox.getChildren().add(hbox);
@@ -586,7 +624,7 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
                     }
                 }
 
-                iServeur.envoiFichierATousLesUtilisateurs(nom_utilisateur,role,inc, selectedFile.getName());
+                iServeur.envoiFichier("Zone_de_partage",nom_utilisateur,role,inc, selectedFile.getName(),"");
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -594,7 +632,31 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
     }
 
     /**
-     * Recevoir le fichier et afficher son nom qui est clickable pour l'enregistrer ou l'afficher
+     * click sur le button envoyer un fichier pour les discussions
+     */
+    public void choisirUnFichierAEnvoyerDiscussionButtonOnAction(){
+        Stage stage = new Stage();
+        File selectedFile = fileChooser.showOpenDialog(stage);
+        if (selectedFile != null) {
+            try {
+                ArrayList<Integer> inc;
+                try (FileInputStream in = new FileInputStream(selectedFile)) {
+                    inc = new ArrayList<>();
+                    int c=0;
+                    while((c=in.read()) != -1) {
+                        inc.add(c);
+                    }
+                }
+
+                iServeur.envoiFichier("Zone_de_discussion",nom_utilisateur,role,inc, selectedFile.getName(),nom_utilisateur_destination);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Recevoir le fichier et afficher son nom qui est clickable pour l'enregistrer zone de partage
      * @param nom_utilisateur_source
      * @param role_utilisateur_source
      * @param inc
@@ -602,15 +664,18 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
      * @throws RemoteException
      */
     @Override
-    public void recevoirFichierDuServeur(String nom_utilisateur_source,String role_utilisateur_source, ArrayList<Integer> inc, String nom_fichier) throws RemoteException {
+    public void recevoirFichierDuServeurPourZoneDePartage(String nom_utilisateur_source,String role_utilisateur_source, ArrayList<Integer> inc, String nom_fichier) throws RemoteException {
         String nom_a_afficher = "";
         String couleur_nom;
+
+        final ContextMenu contextMenu = new ContextMenu();
+        telechargerLeFichier(contextMenu, inc, nom_fichier);
 
         if(nom_utilisateur_source.equals(nom_utilisateur)){
             nom_a_afficher = "Moi";
             couleur_nom = "51005B";
         }else if(role_utilisateur_source.equals("Professeur")){
-            nom_a_afficher = "Professeur";
+            nom_a_afficher = nom_utilisateur_source;
             couleur_nom = "5B0000";
         }else{
             nom_a_afficher = nom_utilisateur_source;
@@ -633,7 +698,130 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
 
         hbox.getChildren().add(textFlow);
 
+        hbox.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.isSecondaryButtonDown()) {
+                    contextMenu.show(hbox, event.getScreenX(), event.getScreenY());
+                }
+            }
+        });
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                vBoxFichiers.getChildren().add(hbox);
+            }
+        });
+    }
+
+    /**
+     * Recevoir le fichier et afficher son nom qui est clickable pour l'enregistrer partie discussion
+     * @param nom_utilisateur_source
+     * @param role_utilisateur_source
+     * @param inc
+     * @param nom_fichier
+     * @param nom_utilisateur_destination
+     * @throws RemoteException
+     */
+    @Override
+    public void recevoirFichierDuServeurPourZoneDeDiscussion(String nom_utilisateur_source, String role_utilisateur_source, ArrayList<Integer> inc, String nom_fichier, String nom_utilisateur_destination) throws RemoteException {
+
         final ContextMenu contextMenu = new ContextMenu();
+        telechargerLeFichier(contextMenu, inc, nom_fichier);
+
+        HBox hbox = new HBox();
+        hbox.setPadding(new Insets(5,5,5,10));
+
+        hbox.heightProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldvalue, Object newValue) {
+                messageTextArea.setVvalue((Double)newValue );
+            }
+        });
+
+        hbox.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.isSecondaryButtonDown()) {
+                    contextMenu.show(hbox, event.getScreenX(), event.getScreenY());
+                }
+            }
+        });
+
+        Text textFichier = new Text(nom_fichier);
+
+        if(nom_utilisateur.equals(nom_utilisateur_source)){
+            //mettre le fichier à droite du discussion
+            hbox.setAlignment(Pos.CENTER_RIGHT);
+
+            TextFlow textFlow = new TextFlow(textFichier);
+            textFlow.setStyle("-fx-color:rgb(239,242,255);"+" -fx-background-color:rgb(15,125,242);"+" -fx-background-radius: 7px 2px 2px 7px");
+            textFlow.setPadding(new Insets(5,10,5,10));
+            textFlow.setMaxWidth(150);
+
+            hbox.getChildren().add(textFlow);
+
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    if(nom_utilisateur_destination.equals("")){
+                        vBoxMessages.getChildren().add(hbox);
+                    }else{
+                        for(int j = 0; j < utilisateursDiscussions.size() ; j++){
+                            if(nom_utilisateur_destination.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
+                                utilisateursDiscussions.get(j).vBox.getChildren().add(hbox);
+                            }
+                        }
+                    }
+                }
+            });
+
+        }else{
+            hbox.setAlignment(Pos.CENTER_LEFT);
+
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    if(nom_utilisateur_destination.equals("")){
+                        Text textNomUtilisateur = new Text(nom_utilisateur_source+"\n");
+                        textNomUtilisateur.setFill(Color.web("002B5B"));
+
+                        TextFlow textFlow = new TextFlow(textNomUtilisateur,textFichier);
+                        textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
+                        textFlow.setPadding(new Insets(5,10,5,10));
+                        textFlow.setMaxWidth(150);
+
+                        hbox.getChildren().add(textFlow);
+
+                        vBoxMessages.getChildren().add(hbox);
+                    }else{
+                        TextFlow textFlow = new TextFlow(textFichier);
+                        textFlow.setStyle("-fx-background-color:rgb(233,233,235);"+" -fx-background-radius: 2px 7px 7px 2px");
+                        textFlow.setPadding(new Insets(5,10,5,10));
+                        textFlow.setMaxWidth(150);
+
+                        hbox.getChildren().add(textFlow);
+
+                        for(int j = 0; j < utilisateursDiscussions.size() ; j++){
+                            if(nom_utilisateur_source.equals(utilisateursDiscussions.get(j).nom_utilisateur)){
+                                utilisateursDiscussions.get(j).vBox.getChildren().add(hbox);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * cette methode pour que je puisse telecherger le fichier passer au parametre (inc)
+     * je l'ai utilisé dans les deux methodes recevoirFichierDuServeurPourZoneDePartage et recevoirFichierDuServeurPourZoneDeDiscussion
+     * @param contextMenu
+     * @param inc
+     * @param nom_fichier
+     */
+    public void telechargerLeFichier(ContextMenu contextMenu, ArrayList<Integer> inc, String nom_fichier){
         MenuItem telecharger = new MenuItem("Télecharger");
         contextMenu.getItems().addAll(telecharger);
         telecharger.setOnAction(new EventHandler<ActionEvent>() {
@@ -684,23 +872,5 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
                 }catch (Exception e){}
             }
         });
-
-        hbox.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (event.isSecondaryButtonDown()) {
-                    contextMenu.show(hbox, event.getScreenX(), event.getScreenY());
-                }
-            }
-        });
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                vBoxFichiers.getChildren().add(hbox);
-            }
-        });
     }
-
-
 }

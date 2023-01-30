@@ -23,5 +23,5 @@ public interface IServeur extends Remote {
     public void supprimerTousLesDessinsDuTableauBlanc(String nom_utilisateur) throws RemoteException;
     public boolean voirAuthorisationDeDessinerSurTanleauBlanc() throws RemoteException;
     public void changerAuthorisationDesEtudiantsADissinerDuServeur(boolean nouvelle_valeur) throws RemoteException;
-    public void envoiFichierATousLesUtilisateurs(String nom_utilisateur_source,String role_utilisateur_source,ArrayList<Integer> inc, String nom_fichier) throws RemoteException;
+    public void envoiFichier(String zone_discussion_ou_partage, String nom_utilisateur_source,String role_utilisateur_source,ArrayList<Integer> inc, String nom_fichier,String nom_utilisateur_destination) throws RemoteException;
 }

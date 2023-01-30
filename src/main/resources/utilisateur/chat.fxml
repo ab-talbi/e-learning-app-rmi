@@ -39,14 +39,19 @@
                   <Font name="Arial Black" size="13.0" />
                </font>
             </Button>
-            <ScrollPane fx:id="messageTextArea" layoutX="4.0" layoutY="38.0" prefHeight="385.0" prefWidth="282.0">
+            <ScrollPane fx:id="messageTextArea" layoutX="4.0" layoutY="38.0" prefHeight="355.0" prefWidth="282.0">
                <content>
-                  <VBox fx:id="vBoxMessages" prefHeight="379.0" prefWidth="278.0" />
+                  <VBox fx:id="vBoxMessages" prefHeight="344.0" prefWidth="271.0" />
                </content>
             </ScrollPane>
             <Button fx:id="labelButton" layoutX="5.0" layoutY="4.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="282.0" style="-fx-background-color: #FFFFFF;" textFill="#040043">
                <font>
                   <Font size="11.0" />
+               </font>
+            </Button>
+            <Button fx:id="choisirUnFichierAEnvoyerButton" layoutX="5.0" layoutY="401.0" mnemonicParsing="false" onAction="#choisirUnFichierAEnvoyerDiscussionButtonOnAction" style="-fx-background-color: #002B5B;" text="envoyer un fichier" textFill="WHITE">
+               <font>
+                  <Font size="13.0" />
                </font>
             </Button>
          </children>
