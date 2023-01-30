@@ -7,6 +7,8 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -15,7 +17,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
     private static ArrayList<Session> session = new ArrayList<Session>();
     private static boolean interdit_de_dessiner_dans_le_tableau_blanc = false;
 
-    static final String DB_URL = "jdbc:mysql://localhost:3310/TestUDP";
+    static final String DB_URL = "jdbc:mysql://localhost:3310/rmi-e-learning-db";
     static final String USER = "root";
     static final String PASS = "";
 
@@ -42,6 +44,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
     @Override
     public String[] seConnecter(String nom_utilisateur, String mot_de_passe) throws RemoteException, SQLException{
         boolean utilisateur_deja_connecte = false;
+        String mot_de_passe_utilisateur_hashed = motDePasseHashing(mot_de_passe);
         String mot_de_passe_bd = "";
         String role = "";
         String[] message_de_retour = new String[2];
@@ -61,7 +64,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
              * Récuperer le mot de passe de cette utilisaateur et son role de la bd
              */
             Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            String strSelect = "Select * from registration where username= ?";
+            String strSelect = "Select * from registration where nom_utilisateur= ?";
 
             PreparedStatement st = conn.prepareStatement(strSelect);
             st.setString(1,nom_utilisateur);
@@ -72,7 +75,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
                 role = rs.getString(5);
             }
 
-            if(mot_de_passe.equals(mot_de_passe_bd)){
+            if(mot_de_passe_utilisateur_hashed.equals(mot_de_passe_bd)){
                 message_de_retour[0] = "success";
                 message_de_retour[1] = role;
             }else{
@@ -293,7 +296,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
 
         ResultSet rs = st.executeQuery();
         while (rs.next()) {
-            laListeAEnvoyer.add(rs.getString("username"));
+            laListeAEnvoyer.add(rs.getString("nom_utilisateur"));
         }
 
         return laListeAEnvoyer;
@@ -318,7 +321,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
         Statement stmt = conn.createStatement();
 
         // Voir est ce que le nom d'utilisateur est disponible
-        String selectQuery = "Select * from registration where username= ?";
+        String selectQuery = "Select * from registration where nom_utilisateur= ?";
         PreparedStatement st = conn.prepareStatement(selectQuery);
         st.setString(1,nom_utilisateur);
 
@@ -333,7 +336,7 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
             message_a_afficher[0] = "erreur";
             message_a_afficher[1] = "Le nom d'utilisateur n'est pas disponible";
         }else{
-            String insertQuery = "INSERT INTO registration VALUES ('"+nom_utilisateur+"','"+nom+"','"+prenom+"','"+mot_de_passe+"','"+role_utilisateur+"')";
+            String insertQuery = "INSERT INTO registration VALUES ('"+nom_utilisateur+"','"+nom+"','"+prenom+"','"+motDePasseHashing(mot_de_passe)+"','"+role_utilisateur+"')";
             stmt.executeUpdate(insertQuery);
 
             message_a_afficher[0] = "success";
@@ -341,5 +344,32 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
         }
 
         return message_a_afficher;
+    }
+
+    /**
+     * Pour raison de securité pour le mot de passe avant de l'enregistrer dans la base de donnés
+     * @param mot_de_passe
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    public String motDePasseHashing(String mot_de_passe){
+        MessageDigest messageDigest = null;
+        String mot_de_passe_final = "";
+        try {
+            messageDigest = MessageDigest.getInstance("SHA");
+            messageDigest.update(mot_de_passe.getBytes());
+            byte[] resultat = messageDigest.digest();
+            StringBuilder stringBuilder = new StringBuilder();
+            for (byte b : resultat) {
+                stringBuilder.append(String.format("%02x",b));
+            }
+
+            mot_de_passe_final = stringBuilder.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return mot_de_passe_final;
     }
 }
