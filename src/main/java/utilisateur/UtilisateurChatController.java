@@ -45,6 +45,8 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
     @FXML
     private Label welcomeLabel;
     @FXML
+    private Label discussionLabel;
+    @FXML
     private Button deconnecterButton;
     @FXML
     private ListView<String> listeAfficheUtilisateurs;
@@ -68,6 +70,8 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
 
     public static String nom_utilisateur = "";
     public static String role = "";
+    public static String nom_classe = "";
+
     public String nom_utilisateur_destination = "";
     private static ArrayList<UtilisateursDiscussions> utilisateursDiscussions = new ArrayList<UtilisateursDiscussions>();
 
@@ -107,6 +111,7 @@ public class UtilisateurChatController extends UnicastRemoteObject implements IU
         } catch (Exception e) {}
 
         welcomeLabel.setText(nom_utilisateur);
+        discussionLabel.setText("Espace de la classe "+nom_classe);
 
         messageInput.addEventFilter(KeyEvent.KEY_PRESSED, event->{
             if (event.getCode() == KeyCode.ENTER) {
