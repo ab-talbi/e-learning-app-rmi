@@ -26,6 +26,7 @@ import java.util.ResourceBundle;
 
 import static utilisateur.UtilisateurChatController.nom_utilisateur;
 import static utilisateur.UtilisateurChatController.role;
+import static utilisateur.UtilisateurChatController.nom_classe;
 
 public class UtilisateurLoginController implements Initializable {
 
@@ -88,15 +89,20 @@ public class UtilisateurLoginController implements Initializable {
             }else{
                 nom_utilisateur = usernameInput.getText();
                 role = reponse[1];
-                Stage stage = (Stage) annulerButton.getScene().getWindow();
-                stage.close();
+                nom_classe = reponse[2];
+                if(role.equals("Admin") || nom_classe.equals("")){
+                    errorMessageLogin.setText("Vous n'avez pas le droit de se connecter");
+                }else{
+                    Stage stage = (Stage) annulerButton.getScene().getWindow();
+                    stage.close();
 
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("chat.fxml"));
-                Scene scene = new Scene(fxmlLoader.load(), 733, 520);
-                Stage newStage = new Stage();
-                newStage.setTitle("Espace de l'utilisateur "+nom_utilisateur);
-                newStage.setScene(scene);
-                newStage.show();
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("chat.fxml"));
+                    Scene scene = new Scene(fxmlLoader.load(), 733, 520);
+                    Stage newStage = new Stage();
+                    newStage.setTitle("Espace de l'utilisateur "+nom_utilisateur+" dans la classe "+nom_classe);
+                    newStage.setScene(scene);
+                    newStage.show();
+                }
             }
         }
     }

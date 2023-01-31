@@ -47,7 +47,8 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
         String mot_de_passe_utilisateur_hashed = motDePasseHashing(mot_de_passe);
         String mot_de_passe_bd = "";
         String role = "";
-        String[] message_de_retour = new String[2];
+        String nom_classe = "";
+        String[] message_de_retour = new String[3];
 
         /**
          * Pour voir est ce que l'utilisateur est connecté ou non
@@ -73,18 +74,22 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
             while (rs.next()) {
                 mot_de_passe_bd = rs.getString(4);
                 role = rs.getString(5);
+                nom_classe = rs.getString(6);
             }
 
             if(mot_de_passe_utilisateur_hashed.equals(mot_de_passe_bd)){
                 message_de_retour[0] = "success";
                 message_de_retour[1] = role;
+                message_de_retour[2] = nom_classe;
             }else{
                 message_de_retour[0] = "erreur";
                 message_de_retour[1] = "Nom d'utilisateur ou mot de passe est incorrecte";
+                message_de_retour[2] = "";
             }
         }else{
             message_de_retour[0] = "erreur";
             message_de_retour[1] = "Vous etes déjà connecté!";
+            message_de_retour[1] = "";
         }
 
         return message_de_retour;
@@ -422,6 +427,13 @@ public class Serveur extends UnicastRemoteObject implements IServeur, IServeurPo
         }else{
             String insertQuery = "INSERT INTO classes VALUES ('"+nom_classe+"','"+nom_prof_associe+"')";
             stmt.executeUpdate(insertQuery);
+
+            //modifier la table registration pour ajouter la classe à ce prof
+            String insertQuery1 = "UPDATE registration set classe=? where nom_utilisateur=?";
+            PreparedStatement st2 = conn.prepareStatement(insertQuery1);
+            st2.setString(1, nom_classe);
+            st2.setString(2, nom_prof_associe);
+            int updateStatus=st2.executeUpdate();
 
             message_a_afficher[0] = "success";
             message_a_afficher[1] = "La classe a etait crée avec succes";
